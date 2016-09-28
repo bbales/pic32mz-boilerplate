@@ -1,7 +1,7 @@
 #ifndef UART_H
 #define UART_H
 
-void adcInit();
+// void adcInit();
 void uartInit();
 void uartSend(char a);
 void uartSendString(char * s);

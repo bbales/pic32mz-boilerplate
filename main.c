@@ -12,9 +12,9 @@ int main(void) {
     initCodec();
     // initMem();
 
+    // RE5 is currently used in
     TRISEbits.TRISE5 = 0;
     LATEbits.LATE5 = 1;
-
 
     //  t1Init();
     //  t2Init();

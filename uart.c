@@ -6,14 +6,14 @@
 */
 
 #include <xc.h>
-#include <sys/attribs.h>  
+#include <sys/attribs.h>
 #include <proc/p32mz2048efg064.h>
 #include "uart.h"
 
 
-void adcInit(){
-
-}
+// void adcInit(){
+//
+// }
 
 void uartInit() {
     asm volatile("di"); // Disable all interrupts
@@ -31,13 +31,12 @@ void uartInit() {
     U1MODE = 0x8000; // Enable UART for 8-bit data
     // No Parity, 1 Stop bit
     U1STASET = 0x9400; // Enable Transmit and Receive
-    
+
     asm volatile("ei");
 }
 
 void uartSendChar(char a){
     IFS3bits.U1TXIF = 0;
-    // U1TXREG = 0b000000001;
     U1TXREG = a;
     while(!IFS3bits.U1TXIF);
 }
