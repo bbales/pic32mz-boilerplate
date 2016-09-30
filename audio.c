@@ -8,8 +8,25 @@
 #include <xc.h>
 #include <sys/attribs.h>
 #include "audio.h"
+#include "delay.h"
 
-void initCodec() {
+void codecEnable(int enable){
+    TRISCbits.TRISC14 = 0;
+    if(enable){
+        delay_ms(3);
+        LATCbits.LATC14 = 0;
+    }else{
+        LATCbits.LATC14 = 1;
+    }
+}
+
+void codecInit() {
+    // Disable codec
+    codecEnable(0);
+
+    // Setup reference clocks for MCLK
+    initReferenceClocks();
+
     // Initialize channel samples
     left_input = 0;
     right_input = 0;
@@ -17,11 +34,13 @@ void initCodec() {
     right_output = 0;
 
     // CODEC SDO (PIC SDI @ RD11)
-    TRISDbits.TRISD11 = 1;
+    TRISDbits.TRISD11 = 1; // Input
     SDI4R = 0b0011;
 
     // CODEC SDI (PIC SDO @ RC13)
-    TRISCbits.TRISC13 = 0;
+    OSCCONbits.SOSCEN = 0;
+
+    TRISCbits.TRISC13 = 0; // Output
     RPC13R = 0b1000; // 0b1000 = SDO4
 
     // CODEC WS (PIC SS @ RD9)
@@ -115,6 +134,9 @@ void initCodec() {
 
     // Enable interrupts
     asm volatile("ei");
+
+    // Enable codec
+    codecEnable(1);
 }
 
 // void rwCodec(){
@@ -148,7 +170,7 @@ void __ISR_AT_VECTOR(_SPI4_RX_VECTOR,IPL7SRS) rwCodec2(void){
         channel = 0;
 
         // Passthrough
-        left_output = left_input;
+        // left_output = left_input;
         // sinCount+=1;
         // if(sinCount == 48) sinCount = 0;
         // left_output = sinTable[sinCount];
@@ -168,12 +190,13 @@ void __ISR_AT_VECTOR(_SPI4_RX_VECTOR,IPL7SRS) rwCodec2(void){
         // }
 
         // Write to SPI4BUF
-        SPI4BUF = left_output;
+        SPI4BUF = 0b1010;
+        // SPI4BUF = left_output;
     }else{
         channel = 1;
 
         // Passthrough
-        right_output = right_input;
+        // right_output = right_input;
         // right_output = sinTable[sinCount];
         // right_output = 0b01111111111111111111111111111111;
 
@@ -191,7 +214,8 @@ void __ISR_AT_VECTOR(_SPI4_RX_VECTOR,IPL7SRS) rwCodec2(void){
         // }
 
         // Write to SPI4BUF
-        SPI4BUF = right_output;
+        SPI4BUF = 0b1010;
+        // SPI4BUF = right_output;
     }
     IFS5bits.SPI4RXIF = 0;
     // while(!IFS5bits.SPI4RXIF);

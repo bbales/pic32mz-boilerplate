@@ -1,3 +1,4 @@
 build/default/production/audio.o:  \
 audio.c  \
-audio.h 
+audio.h  \
+delay.h 

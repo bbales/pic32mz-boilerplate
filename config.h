@@ -23,7 +23,7 @@
 #pragma config IESO = OFF    // Internal/External Switch Over (Enabled)
 #pragma config POSCMOD = OFF // Primary Oscillator Configuration (Primary osc disabled)
 #pragma config OSCIOFNC = OFF // CLKO Output Signal Active on the OSCO Pin (Disabled)
-#pragma config FCKSM = CSECME    // Clock Switching and Monitor Selection (Clock
+#pragma config FCKSM = CSDCMD    // Clock Switching and Monitor Selection (Clock
 #pragma config WDTPS = PS1048576 // Watchdog Timer Postscaler (1:1048576)
 #pragma config WDTSPGM = STOP    // Watchdog Timer Stop During Flash Programming
 #pragma config WINDIS = NORMAL // Watchdog Timer Window Mode (Watchdog Timer is
@@ -42,8 +42,8 @@
 #pragma config FSLEEP = OFF
 #pragma config DBGPER = ALLOW_PG2
 #pragma config SMCLR = MCLR_NORM
-#pragma config SOSCGAIN = GAIN_2X // Secondary Oscillator Gain Control bits (2x gain setting)
-#pragma config SOSCBOOST = ON // Secondary Oscillator Boost Kick Start Enable
+#pragma config SOSCGAIN = GAIN_1X // Secondary Oscillator Gain Control bits (2x gain setting)
+#pragma config SOSCBOOST = OFF // Secondary Oscillator Boost Kick Start Enable
 #pragma config POSCGAIN = GAIN_2X // Primary Oscillator Gain Control bits (2x gain setting)
 #pragma config POSCBOOST = ON // Primary Oscillator Boost Kick Start Enable bit
 #pragma config EJTAGBEN = NORMAL // EJTAG Boot (Normal EJTAG functionality)

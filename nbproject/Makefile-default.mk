@@ -45,17 +45,17 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Source Files Quoted if spaced
-SOURCEFILES_QUOTED_IF_SPACED=main.c audio.c init.c timers.c uart.c
+SOURCEFILES_QUOTED_IF_SPACED=main.c audio.c init.c timers.c uart.c delay.c
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/main.o ${OBJECTDIR}/audio.o ${OBJECTDIR}/init.o ${OBJECTDIR}/timers.o ${OBJECTDIR}/uart.o
-POSSIBLE_DEPFILES=${OBJECTDIR}/main.o.d ${OBJECTDIR}/audio.o.d ${OBJECTDIR}/init.o.d ${OBJECTDIR}/timers.o.d ${OBJECTDIR}/uart.o.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/main.o ${OBJECTDIR}/audio.o ${OBJECTDIR}/init.o ${OBJECTDIR}/timers.o ${OBJECTDIR}/uart.o ${OBJECTDIR}/delay.o
+POSSIBLE_DEPFILES=${OBJECTDIR}/main.o.d ${OBJECTDIR}/audio.o.d ${OBJECTDIR}/init.o.d ${OBJECTDIR}/timers.o.d ${OBJECTDIR}/uart.o.d ${OBJECTDIR}/delay.o.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/main.o ${OBJECTDIR}/audio.o ${OBJECTDIR}/init.o ${OBJECTDIR}/timers.o ${OBJECTDIR}/uart.o
+OBJECTFILES=${OBJECTDIR}/main.o ${OBJECTDIR}/audio.o ${OBJECTDIR}/init.o ${OBJECTDIR}/timers.o ${OBJECTDIR}/uart.o ${OBJECTDIR}/delay.o
 
 # Source Files
-SOURCEFILES=main.c audio.c init.c timers.c uart.c
+SOURCEFILES=main.c audio.c init.c timers.c uart.c delay.c
 
 
 CFLAGS=
@@ -124,6 +124,12 @@ ${OBJECTDIR}/uart.o: uart.c  nbproject/Makefile-${CND_CONF}.mk
 	@${RM} ${OBJECTDIR}/uart.o 
 	@${FIXDEPS} "${OBJECTDIR}/uart.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1 -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/uart.o.d" -o ${OBJECTDIR}/uart.o uart.c     
 	
+${OBJECTDIR}/delay.o: delay.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/delay.o.d 
+	@${RM} ${OBJECTDIR}/delay.o 
+	@${FIXDEPS} "${OBJECTDIR}/delay.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1 -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/delay.o.d" -o ${OBJECTDIR}/delay.o delay.c     
+	
 else
 ${OBJECTDIR}/main.o: main.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}" 
@@ -154,6 +160,12 @@ ${OBJECTDIR}/uart.o: uart.c  nbproject/Makefile-${CND_CONF}.mk
 	@${RM} ${OBJECTDIR}/uart.o.d 
 	@${RM} ${OBJECTDIR}/uart.o 
 	@${FIXDEPS} "${OBJECTDIR}/uart.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/uart.o.d" -o ${OBJECTDIR}/uart.o uart.c     
+	
+${OBJECTDIR}/delay.o: delay.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/delay.o.d 
+	@${RM} ${OBJECTDIR}/delay.o 
+	@${FIXDEPS} "${OBJECTDIR}/delay.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/delay.o.d" -o ${OBJECTDIR}/delay.o delay.c     
 	
 endif
 

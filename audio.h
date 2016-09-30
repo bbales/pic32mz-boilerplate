@@ -3,7 +3,8 @@
 
 void rwCodec();
 void initReferenceClocks();
-void initCodec();
+void codecInit();
+void codecEnable(int enable);
 
 signed long left_input;
 signed long right_input;
