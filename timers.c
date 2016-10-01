@@ -11,29 +11,54 @@
 #include "timers.h"
 #include "uart.h"
 
+// Timer1 handler
+int flip = 0;
+void t1Handler(){
+    flip = !flip;
+    LATDbits.LATD4 = flip;
+    IFS0bits.T1IF = 0; // Clear interrupt
+
+    uartSendString("test");
+    uartNewline();
+}
+
 // Timer 1 - Sampling
 void t1Init(){
     asm volatile("di"); // Disable interrupts
 
-    T1CONbits.ON = 0; // Disable timer 1
-    T1CONbits.TCKPS = 0b00; // Input clock prescale select (1:1)
-    T1CONbits.TCS = 0; // Source is internal peripheral clock
+    // Disable timer 1
+    T1CONbits.ON = 0;
 
-    PR1 = 521; // Timer 1 period
+    // Disable stop in idle mode
+    T1CONbits.SIDL = 0;
 
-    TMR1 = 0; // Clear timer 1 counter
+    // Async timer Write
+    T1CONbits.TWDIS = 1;
 
-    IPC1bits.T1IP = 0b101; // Interrupt priority 5
-    IPC1bits.T1IS = 0b11; // Sub-priority 3
+    // Input clock prescale select (1:1)
+    T1CONbits.TCKPS = 3;
+
+    // Source is internal peripheral bus clock
+    T1CONbits.TCS = 0;
+
+    // Timer 1 period
+    PR1 = 2000;
+
+    // Clear timer 1 counter
+    TMR1 = 0;
+
+    IPC1bits.T1IP = 6; // Interrupt priority 5
+    IPC1bits.T1IS = 3; // Sub-priority 3
     IFS0bits.T1IF = 0;
     IEC0bits.T1IE = 1;
 
-    PRISSbits.PRI6SS = 0b0110; // Shadow set 6
-    INTCONbits.MVEC = 1; // Enable multi-vectored interrupts
+    // Shadow set 6
+    PRISSbits.PRI6SS = 6;
+
+    // Enable timer 1
+    T1CONbits.ON = 1;
 
     asm volatile("ei"); // Enable interrupts
-
-    T1CONbits.ON = 1; // Enable timer 1
 }
 
 // Timer 2 - Controls
@@ -71,10 +96,4 @@ void t2Init(){
    // uartSendString("aur ");
    // uartSendChar('b');
    // IFS0bits.T2IF = 0; // Clear interrupt
-// }
-
-// void __ISR_AT_VECTOR(_TIMER_1_VECTOR, IPL5SRS) T1Interrupt(void){
-   // a2= !a2;
-   // LATEbits.LATE5 = !a2;
-   // IFS0bits.T1IF = 0; // Clear interrupt
 // }

@@ -10,25 +10,36 @@
 #include <proc/p32mz2048efg064.h>
 #include "uart.h"
 
-
-// void adcInit(){
-//
-// }
-
 void uartInit() {
-    asm volatile("di"); // Disable all interrupts
-    // asm volatile("ehb"); // Disable all interrupts
-    U1MODEbits.ON = 0; //! disable UART
-    TRISFbits.TRISF0 = 0;
-    RPF0Rbits.RPF0R = 0b0001; // U1TX
+    // Baud = 115200 8N1
 
-    IPC28bits.U1TXIP = 0b000; //! Interrupt priority of 7
+    // Disable all interrupts
+    asm volatile("di");
+
+    // Disable UART for config
+    U1MODEbits.ON = 0;
+
+    // U1TX
+    TRISFbits.TRISF0 = 0;
+    RPF0Rbits.RPF0R = 0b0001;
+
+    // U1RX
+    TRISFbits.TRISF1 = 1;
+    U1RXR = 0b0100;
+
+    // Configure UART interrupts
+    IPC28bits.U1TXIP = 0b000; //! Interrupt priority of 0
     IPC28bits.U1TXIS = 0b00; //! Interrupt sub-priority of 0
     IFS3bits.U1TXIF = 0; //! Clear Tx flag
     IFS3bits.U1RXIF = 0; //! Clear Rx flag
-    U1BRG = 26; // 38.4k
+
+    // Baud rate generator
+    U1BRG = 26;
     U1STA = 0;
-    U1MODE = 0x8000; // Enable UART for 8-bit data
+
+    // Enable UART for 8-bit data
+    U1MODE = 0x8000;
+
     // No Parity, 1 Stop bit
     U1STASET = 0x9400; // Enable Transmit and Receive
 
@@ -43,8 +54,5 @@ void uartSendChar(char a){
 
 void uartSendString(char * s){
     int i = 0;
-    while(s[i] != '\0'){
-        uartSendChar(s[i]);
-        i++;
-    }
+    while(s[i] != '\0') uartSendChar(s[i++]);
 }

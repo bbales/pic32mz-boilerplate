@@ -7,7 +7,7 @@
 #include <xc.h>
 #include "init.h"
 
-void initOscillator() {
+void oscInit() {
     OSCCONbits.CLKLOCK = 0;
     OSCCONbits.DRMEN = 0;
     OSCCONbits.FRCDIV = 0b000;
@@ -16,9 +16,12 @@ void initOscillator() {
     OSCTUNbits.TUN = 0b000000;
     PB1DIVbits.PBDIV = 0b0000001;
     PB2DIVbits.ON = 0;
+
+    // Enable multi-vectored mode
+    INTCONbits.MVEC = 1;
 }
 
-void initMem(){
+void memInit(){
     // SDO3 on RB9
     TRISBbits.TRISB9 = 0;
 

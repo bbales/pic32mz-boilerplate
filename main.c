@@ -9,29 +9,24 @@
 #include "uart.h"
 
 int main(void) {
-    initOscillator();
+    oscInit();
     codecInit();
-    // initMem();
-
-    // RE5 is currently used in
-    // TRISEbits.TRISE5 = 0;
-    // LATEbits.LATE5 = 1;
+    uartInit();
 
     // Currently used for blink
     TRISDbits.TRISD4 = 0;
 
-    //  t1Init();
+    t1Init();
     //  t2Init();
-    //  uartInit();
 
     while (1){
         // left_output = 8;
         // right_output = 8;
-        delay_ms(500);
-        LATDbits.LATD4 = 1;
-
-        delay_ms(500);
-        LATDbits.LATD4 = 0;
+        // delay_ms(500);
+        // LATDbits.LATD4 = 1;
+        //
+        // delay_ms(500);
+        // LATDbits.LATD4 = 0;
     }
 
     // Impossible!

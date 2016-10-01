@@ -140,7 +140,6 @@ void codecInit() {
 
     // PRISS - Priority shadow select
     PRISSbits.PRI7SS = 0b0111; // Shadow set 7
-    INTCONbits.MVEC = 1; // Enable multi-vectored mode
 
     // Enable interrupts
     asm volatile("ei");
@@ -151,12 +150,12 @@ void codecInit() {
 
 void codecRW(){
     if(channel){
-        // sinCount+=1;
-        // if(sinCount == 48) sinCount = 0;
-        // left_output = sinTable[sinCount] >> 8;
+        sinCount+=1;
+        if(sinCount == 48) sinCount = 0;
+        left_output = sinTable[sinCount] >> 8;
 
         // Passthrough
-        left_output = left_input;
+        // left_output = left_input;
 
         // Read SPI4BUF
         left_input = SPI4BUF;
@@ -174,10 +173,10 @@ void codecRW(){
         // Write to SPI4BUF
         SPI4BUF = left_output;
     }else{
-        // right_output = sinTable[sinCount] >> 8;
+        right_output = sinTable[sinCount] >> 8;
 
         // Passthrough
-        right_output = right_input;
+        // right_output = right_input;
 
         // Read SPI4BUF
         right_input = SPI4BUF;

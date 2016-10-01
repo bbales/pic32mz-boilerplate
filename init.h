@@ -1,7 +1,7 @@
 #ifndef INIT_H
 #define INIT_H
 
-void initOscillator();
-void initMem();
+void oscInit();
+void memInit();
 
 #endif
