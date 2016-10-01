@@ -14,9 +14,9 @@ void codecEnable(int enable){
     TRISCbits.TRISC14 = 0;
     if(enable){
         delay_ms(3);
-        LATCbits.LATC14 = 0;
-    }else{
         LATCbits.LATC14 = 1;
+    }else{
+        LATCbits.LATC14 = 0;
     }
 }
 
@@ -38,10 +38,8 @@ void codecInit() {
     SDI4R = 0b0011;
 
     // CODEC SDI (PIC SDO @ RC13)
-    OSCCONbits.SOSCEN = 0;
-
-    TRISCbits.TRISC13 = 0; // Output
-    RPC13R = 0b1000; // 0b1000 = SDO4
+    TRISBbits.TRISB3 = 0; // Output
+    RPB3R = 0b1000; // 0b1000 = SDO4
 
     // CODEC WS (PIC SS @ RD9)
     PMCONbits.ON = 0; // Disable PMCS2
@@ -92,7 +90,7 @@ void codecInit() {
 
     SPI4CONbits.SMP = 0; // Input sample phase, 1* = end, 0 = middle
     SPI4CONbits.CKE = 1; // Clock edge select, 1 = data changes on active->idle, 0 = data changes on idle->active
-    SPI4CONbits.CKP = 0; // Clock polarity select, 1 = active is low, 0 = active is high
+    SPI4CONbits.CKP = 1; // Clock polarity select, 1 = active is low, 0 = active is high
     SPI4CONbits.MSTEN = 1; // Master Mode Enable, 1 = master, 0 = slave
     SPI4CONbits.SRXISEL = 0b11; // Recieve buffer interrupt is generated when buffer is full (pg 310)
 
@@ -139,42 +137,16 @@ void codecInit() {
     codecEnable(1);
 }
 
-// void rwCodec(){
-//     // Write to SPI4BUF
-//     SPI4BUF = left_output;
-//
-//     while(!IFS5bits.SPI4RXIF);
-//
-//     // Read SPI4BUF
-//     right_input = SPI4BUF;
-//
-//     // Clear Interrupt Flag
-//     IFS5bits.SPI4RXIF = 0;
-//     // Write to SPI4BUF
-//     SPI4BUF = right_output;
-//
-//     while(!IFS5bits.SPI4RXIF);
-//
-//     // Read SPI4BUF
-//     left_input = SPI4BUF;
-//
-//     // Clear Interrupt Flag
-//     IFS5bits.SPI4RXIF = 0;
-// }
-
-int channel = 0;
-unsigned int sinTable[48] = {100000, 113052, 125881, 138268, 149999, 160876, 170710, 179335, 186602, 192387, 196592, 199144, 200000, 199144, 196592, 192387, 186602, 179335, 170710, 160876, 149999, 138268, 125881, 113052, 100000, 86947, 74118, 61731, 49999, 39123, 29289, 20664, 13397, 7612, 3407, 855, 0, 855, 3407, 7612, 13397, 20664, 29289, 39123, 49999, 61731, 74118, 86947};
+// var sinTable = []; for(var i = 0; i < 48; i++) sinTable[i] = Math.floor(Math.sin((i/48)*2*Math.PI)*2147483647)
+unsigned int sinTable[48] = {0, 280302863, 555809666, 821806412, 1073741823, 1307305213, 1518500249, 1703713324, 1859775392, 1984016187, 2074309916, 2129111626, 2147483647, 2129111626, 2074309916, 1984016187, 1859775392, 1703713324, 1518500249, 1307305213, 1073741823, 821806412, 555809666, 280302863, 0, -280302864, -555809667, -821806413, -1073741824, -1307305214, -1518500250, -1703713325, -1859775393, -1984016188, -2074309917, -2129111627, -2147483647, -2129111627, -2074309917, -1984016188, -1859775393, -1703713325, -1518500250, -1307305214, -1073741824, -821806413, -555809667, -280302864};
 int sinCount = 0;
 void __ISR_AT_VECTOR(_SPI4_RX_VECTOR,IPL7SRS) rwCodec2(void){
     if(channel){
-        channel = 0;
-
         // Passthrough
         // left_output = left_input;
-        // sinCount+=1;
-        // if(sinCount == 48) sinCount = 0;
-        // left_output = sinTable[sinCount];
-        // left_output = 0b11111111111111111111111111111111;
+        sinCount+=1;
+        if(sinCount == 48) sinCount = 0;
+        left_output = sinTable[sinCount] >> 8;
 
         // Read SPI4BUF
         left_input = SPI4BUF;
@@ -190,15 +162,11 @@ void __ISR_AT_VECTOR(_SPI4_RX_VECTOR,IPL7SRS) rwCodec2(void){
         // }
 
         // Write to SPI4BUF
-        SPI4BUF = 0b1010;
-        // SPI4BUF = left_output;
+        SPI4BUF = left_output;
     }else{
-        channel = 1;
-
         // Passthrough
         // right_output = right_input;
-        // right_output = sinTable[sinCount];
-        // right_output = 0b01111111111111111111111111111111;
+        right_output = sinTable[sinCount] >> 8;
 
         // Read SPI4BUF
         right_input = SPI4BUF;
@@ -214,11 +182,14 @@ void __ISR_AT_VECTOR(_SPI4_RX_VECTOR,IPL7SRS) rwCodec2(void){
         // }
 
         // Write to SPI4BUF
-        SPI4BUF = 0b1010;
-        // SPI4BUF = right_output;
+        SPI4BUF = right_output;
     }
+
+    // Switch channels
+    channel = !channel;
+
+    // Clear interrupt flag
     IFS5bits.SPI4RXIF = 0;
-    // while(!IFS5bits.SPI4RXIF);
 }
 
 void initReferenceClocks() {
@@ -254,3 +225,26 @@ void initReferenceClocks() {
     LATFbits.LATF5 = 0;
     RPF5R = 0b1111;
 }
+
+// void rwCodec(){
+//     // Write to SPI4BUF
+//     SPI4BUF = left_output;
+//
+//     while(!IFS5bits.SPI4RXIF);
+//
+//     // Read SPI4BUF
+//     right_input = SPI4BUF;
+//
+//     // Clear Interrupt Flag
+//     IFS5bits.SPI4RXIF = 0;
+//     // Write to SPI4BUF
+//     SPI4BUF = right_output;
+//
+//     while(!IFS5bits.SPI4RXIF);
+//
+//     // Read SPI4BUF
+//     left_input = SPI4BUF;
+//
+//     // Clear Interrupt Flag
+//     IFS5bits.SPI4RXIF = 0;
+// }

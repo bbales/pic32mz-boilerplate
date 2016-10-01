@@ -11,7 +11,6 @@ void initOscillator() {
     OSCCONbits.CLKLOCK = 0;
     OSCCONbits.DRMEN = 0;
     OSCCONbits.FRCDIV = 0b000;
-    OSCCONbits.SOSCEN = 0;
     OSCCONbits.COSC = 0b111; // Start with FRC
     OSCCONbits.SLPEN = 0;
     OSCTUNbits.TUN = 0b000000;

@@ -42,8 +42,8 @@
 #pragma config FSLEEP = OFF
 #pragma config DBGPER = ALLOW_PG2
 #pragma config SMCLR = MCLR_NORM
-#pragma config SOSCGAIN = GAIN_1X // Secondary Oscillator Gain Control bits (2x gain setting)
-#pragma config SOSCBOOST = OFF // Secondary Oscillator Boost Kick Start Enable
+// #pragma config SOSCGAIN = GAIN_1X // Secondary Oscillator Gain Control bits (2x gain setting)
+// #pragma config SOSCBOOST = OFF // Secondary Oscillator Boost Kick Start Enable
 #pragma config POSCGAIN = GAIN_2X // Primary Oscillator Gain Control bits (2x gain setting)
 #pragma config POSCBOOST = ON // Primary Oscillator Boost Kick Start Enable bit
 #pragma config EJTAGBEN = NORMAL // EJTAG Boot (Normal EJTAG functionality)
