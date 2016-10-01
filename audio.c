@@ -10,8 +10,12 @@
 #include "audio.h"
 #include "delay.h"
 
+// var sinTable = []; for(var i = 0; i < 48; i++) sinTable[i] = Math.floor(Math.sin((i/48)*2*Math.PI)*2147483647)
+unsigned int sinTable[48] = {0, 280302863, 555809666, 821806412, 1073741823, 1307305213, 1518500249, 1703713324, 1859775392, 1984016187, 2074309916, 2129111626, 2147483647, 2129111626, 2074309916, 1984016187, 1859775392, 1703713324, 1518500249, 1307305213, 1073741823, 821806412, 555809666, 280302863, 0, -280302864, -555809667, -821806413, -1073741824, -1307305214, -1518500250, -1703713325, -1859775393, -1984016188, -2074309917, -2129111627, -2147483647, -2129111627, -2074309917, -1984016188, -1859775393, -1703713325, -1518500250, -1307305214, -1073741824, -821806413, -555809667, -280302864};
+int sinCount = 0;
+
 void codecEnable(int enable){
-    TRISCbits.TRISC14 = 0;
+    TRISCbits.TRISC14 = OUTPUT;
     if(enable){
         delay_ms(3);
         LATCbits.LATC14 = 1;
@@ -33,24 +37,33 @@ void codecInit() {
     left_output = 0;
     right_output = 0;
 
+    // Overlapping modules
+    PMCONbits.ON = 0; // Disable PMCS2
+    PMAENbits.PTEN = 0; // DIsable PMA15
+    ETHCON1bits.ON = 0; // Disable ECOL
+    I2C1CONbits.ON = 0; // Disable SCL1
+    I2C5CONbits.ON = 0; // Disable SDA5
+    PMCONbits.ON = 0;   // Disable PMA9
+
     // CODEC SDO (PIC SDI @ RD11)
-    TRISDbits.TRISD11 = 1; // Input
+    TRISDbits.TRISD11 = INPUT;
     SDI4R = 0b0011;
 
     // CODEC SDI (PIC SDO @ RC13)
-    TRISBbits.TRISB3 = 0; // Output
-    RPB3R = 0b1000; // 0b1000 = SDO4
+    TRISBbits.TRISB3 = OUTPUT;
+    RPB3R = 0b1000;
 
     // CODEC WS (PIC SS @ RD9)
-    PMCONbits.ON = 0; // Disable PMCS2
-    PMAENbits.PTEN = 0; // DIsable PMA15
-    TRISDbits.TRISD9 = 0;
-    RPD9R = 0b1000; // 0b1000 = SS4
+    TRISDbits.TRISD9 = OUTPUT;
+    RPD9R = 0b1000;
 
     // CODEC SCK (PIC SCK @ RD10)
-    ETHCON1bits.ON = 0; // Disable ECOL
-    I2C1CONbits.ON = 0; // Disable SCL1
-    TRISDbits.TRISD10 = 0; // SCK4
+    TRISDbits.TRISD10 = OUTPUT;
+
+    // CODEC MCLK Output
+    TRISFbits.TRISF5 = OUTPUT;
+    LATFbits.LATF5 = 0;
+    RPF5R = 0b1111;
 
     // SPI4 Setup
     SPI4CONbits.ON = 0; // Turn off
@@ -137,16 +150,14 @@ void codecInit() {
     codecEnable(1);
 }
 
-// var sinTable = []; for(var i = 0; i < 48; i++) sinTable[i] = Math.floor(Math.sin((i/48)*2*Math.PI)*2147483647)
-unsigned int sinTable[48] = {0, 280302863, 555809666, 821806412, 1073741823, 1307305213, 1518500249, 1703713324, 1859775392, 1984016187, 2074309916, 2129111626, 2147483647, 2129111626, 2074309916, 1984016187, 1859775392, 1703713324, 1518500249, 1307305213, 1073741823, 821806412, 555809666, 280302863, 0, -280302864, -555809667, -821806413, -1073741824, -1307305214, -1518500250, -1703713325, -1859775393, -1984016188, -2074309917, -2129111627, -2147483647, -2129111627, -2074309917, -1984016188, -1859775393, -1703713325, -1518500250, -1307305214, -1073741824, -821806413, -555809667, -280302864};
-int sinCount = 0;
 void __ISR_AT_VECTOR(_SPI4_RX_VECTOR,IPL7SRS) rwCodec2(void){
     if(channel){
-        // Passthrough
-        // left_output = left_input;
         sinCount+=1;
         if(sinCount == 48) sinCount = 0;
         left_output = sinTable[sinCount] >> 8;
+
+        // Passthrough
+        // left_output = left_input;
 
         // Read SPI4BUF
         left_input = SPI4BUF;
@@ -164,9 +175,10 @@ void __ISR_AT_VECTOR(_SPI4_RX_VECTOR,IPL7SRS) rwCodec2(void){
         // Write to SPI4BUF
         SPI4BUF = left_output;
     }else{
+        right_output = sinTable[sinCount] >> 8;
+
         // Passthrough
         // right_output = right_input;
-        right_output = sinTable[sinCount] >> 8;
 
         // Read SPI4BUF
         right_input = SPI4BUF;
@@ -193,25 +205,6 @@ void __ISR_AT_VECTOR(_SPI4_RX_VECTOR,IPL7SRS) rwCodec2(void){
 }
 
 void initReferenceClocks() {
-    // OSC4
-    I2C5CONbits.ON = 0; // Disable SDA5
-    PMCONbits.ON = 0;   // Disable PMA9
-
-    REFO4CONbits.ON = 0;
-    REFO4CONbits.ACTIVE = 0;
-    REFO4CONbits.RODIV = 0b000000000000100; // Divide by 2
-    REFO4CONbits.SIDL = 0;
-    REFO4CONbits.OE = 1;
-    REFO4CONbits.RSLP = 1;
-    REFO4CONbits.ROSEL = 0b0111; // PLL
-    REFO4TRIMbits.ROTRIM = 0b000100011;
-    REFO4CONbits.ON = 1;
-
-    // REFCLK FREQ = PLL / ( 2 * (RODIV + ROTRIM/512))
-    TRISFbits.TRISF4 = 0;
-    LATFbits.LATF4 = 0;
-    RPF4R = 0b1101;
-
     // REFCLKO1 for ADC
     REFO1CONbits.ON = 0;
     REFO1CONbits.ACTIVE = 0;
@@ -220,10 +213,6 @@ void initReferenceClocks() {
     REFO1CONbits.RODIV = 0b000000000000100; // 8
     REFO1TRIMbits.ROTRIM = 0b000100011;
     REFO1CONbits.ON = 1;
-
-    TRISFbits.TRISF5 = 0;
-    LATFbits.LATF5 = 0;
-    RPF5R = 0b1111;
 }
 
 // void rwCodec(){

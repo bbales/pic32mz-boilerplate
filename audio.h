@@ -1,6 +1,9 @@
 #ifndef AUDIO_H
 #define AUDIO_H
 
+#define OUTPUT 0
+#define INPUT 1
+
 void rwCodec();
 void initReferenceClocks();
 void codecInit();

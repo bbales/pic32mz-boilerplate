@@ -1,12 +1,12 @@
 #include <xc.h>
 #include <sys/attribs.h>
+
 #include "config.h"
 #include "init.h"
 #include "audio.h"
 #include "delay.h"
 #include "timers.h"
 #include "uart.h"
-
 
 int main(void) {
     initOscillator();
@@ -17,6 +17,7 @@ int main(void) {
     // TRISEbits.TRISE5 = 0;
     // LATEbits.LATE5 = 1;
 
+    // Currently used for blink
     TRISDbits.TRISD4 = 0;
 
     //  t1Init();
