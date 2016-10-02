@@ -13,7 +13,8 @@ extern "C" {
 #endif
 
 void adcInit();
-int readADC(int channel);
+int readADC(int achannel);
+int readFilteredADC(int achannel);
 
 #ifdef	__cplusplus
 }

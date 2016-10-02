@@ -11,6 +11,8 @@
 #include "adc.h"
 
 void adcInit(){
+    // ADC1 does channels 0-31...
+
     // Clear control registers
     ADCCON1 = 0;
     ADCCON2 = 0;
@@ -35,17 +37,11 @@ void adcInit(){
     ADCCMPCON1 = 0;
     ADCCMPCON2 = 0;
     ADCCMPCON3 = 0;
-    ADCCMPCON4 = 0;
-    ADCCMPCON5 = 0;
-    ADCCMPCON6 = 0;
 
     // Disable oversampling filters
     ADCFLTR1 = 0;
     ADCFLTR2 = 0;
     ADCFLTR3 = 0;
-    ADCFLTR4 = 0;
-    ADCFLTR5 = 0;
-    ADCFLTR6 = 0;
 
     // ADCCON1
     ADCCON1bits.FRACT = 0; // Fractional Data Output Format (Integer)
@@ -71,6 +67,12 @@ void adcInit(){
     ADC2TIMEbits.ADCDIV = 1;
     ADC2TIMEbits.SAMC = 5;
     ADC2TIMEbits.SELRES = 2;
+
+    // Enable filter 1
+    ADCFLTR1bits.DFMODE = 1; // Averaging mode
+    ADCFLTR1bits.OVRSAM = 5; // 4 samples to be averaged, can try higher
+    ADCFLTR1bits.AFGIEN = 1; // Interrupt enabled
+    ADCFLTR1bits.AFEN = 1; // Enable the filter
 
     // Select analog input for ADC modules, no presync trigger, not sync sampling
     ADCTRGMODE = 0;
@@ -124,4 +126,16 @@ int readADC(int achannel){
     ADCCON3bits.GSWTRG = 1;
     while(((ADCDSTAT1 >> achannel) | 1) == 0);
     return getDataADC(achannel);
+}
+
+int readFilteredADC(int achannel){
+    ADCFLTR1bits.CHNLID = achannel; // Select channel 1
+    ADCFLTR1bits.AFEN = 1; // Enable the filter
+    ADCCON3bits.ADINSEL = achannel; // Channel to manually trigger
+    ADCCON3bits.RQCNVRT = 1; // Manually trigger selected channel
+
+    while(ADCFLTR1bits.AFRDY == 0); // Wait until oversampling is done
+    ADCFLTR1bits.AFEN = 0; // Enable the digital filtering
+
+    return ADCFLTR1bits.FLTRDATA;
 }

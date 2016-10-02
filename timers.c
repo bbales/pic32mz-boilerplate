@@ -22,13 +22,20 @@ void t1Handler(){
     IFS0bits.T1IF = 0; // Clear interrupt
 
     uartClearScreen();
-    res = readADC(2);
-    sprintf(str, "Pot 1: %d", res);
+
+    // res = readADC(2);
+    // sprintf(str, "Pot 1: %d", res);
+    // uartSendString(str);
+    // uartNewline();
+
+    // res = readADC(1);
+    res = readFilteredADC(1);
+    sprintf(str, "Pot 2: %d", res);
     uartSendString(str);
     uartNewline();
 
     res = readADC(1);
-    sprintf(str, "Pot 2: %d", res);
+    sprintf(str, "Pot 1: %d", res);
     uartSendString(str);
     uartNewline();
 }
@@ -53,7 +60,8 @@ void t1Init(){
     T1CONbits.TCS = 0;
 
     // Timer 1 period
-    PR1 = 2000;
+    PR1 = 20000;
+    // PR1 = 2000;
 
     // Clear timer 1 counter
     TMR1 = 0;
