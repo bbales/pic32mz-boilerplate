@@ -28,14 +28,53 @@ void t1Handler(){
     // uartSendString(str);
     // uartNewline();
 
-    // res = readADC(1);
+    res = readFilteredADC(0);
+    sprintf(str, "Pot 0: %d", res);
+    uartSendString(str);
+    uartNewline();
+
+    res = readADC(0);
+    sprintf(str, "Pot 0: %d", res);
+    uartSendString(str);
+    uartNewline();
+
     res = readFilteredADC(1);
-    sprintf(str, "Pot 2: %d", res);
+    sprintf(str, "Pot 1: %d", res);
     uartSendString(str);
     uartNewline();
 
     res = readADC(1);
     sprintf(str, "Pot 1: %d", res);
+    uartSendString(str);
+    uartNewline();
+
+    res = readFilteredADC(2);
+    sprintf(str, "Pot 2: %d", res);
+    uartSendString(str);
+    uartNewline();
+
+    res = readADC(2);
+    sprintf(str, "Pot 2: %d", res);
+    uartSendString(str);
+    uartNewline();
+
+    res = readFilteredADC(3);
+    sprintf(str, "Pot 3: %d", res);
+    uartSendString(str);
+    uartNewline();
+
+    res = readADC(3);
+    sprintf(str, "Pot 3: %d", res);
+    uartSendString(str);
+    uartNewline();
+
+    res = readFilteredADC(4);
+    sprintf(str, "Pot 4: %d", res);
+    uartSendString(str);
+    uartNewline();
+
+    res = readADC(4);
+    sprintf(str, "Pot 4: %d", res);
     uartSendString(str);
     uartNewline();
 }

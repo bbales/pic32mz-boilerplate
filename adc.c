@@ -77,6 +77,7 @@ void adcInit(){
     // Select analog input for ADC modules, no presync trigger, not sync sampling
     ADCTRGMODE = 0;
 
+    // Common scan select skip for input scan
     ADCCSS1 = 0;
     ADCCSS2 = 0;
 
@@ -86,10 +87,12 @@ void adcInit(){
     // Set up trigger sources
     ADCTRGSNS = 0;
 
-    // Set up software triggering
+    // Set up software triggering - need this for each desired channel
     ADCTRG1bits.TRGSRC0 = 1;
     ADCTRG1bits.TRGSRC1 = 1;
     ADCTRG1bits.TRGSRC2 = 1;
+    ADCTRG1bits.TRGSRC3 = 1;
+    ADCTRG2bits.TRGSRC4 = 1;
 
     // Turn on ADC module
     ADCCON1bits.ON = 1;
@@ -98,20 +101,33 @@ void adcInit(){
     while(!ADCCON2bits.BGVRRDY);
     while(ADCCON2bits.REFFLT);
 
-    // Enable clk to analog
+    // Enable clk to analog - need this for each desired channel
     ADCANCONbits.ANEN0 = 1;
     ADCANCONbits.ANEN1 = 1;
     ADCANCONbits.ANEN2 = 1;
+    ADCANCONbits.ANEN3 = 1;
+    ADCANCONbits.ANEN4 = 1;
 
     // Wait for ADC ready
-    while(!ADCANCONbits.WKRDY0); // Wait until ADC0 is ready
-    while(!ADCANCONbits.WKRDY1); // Wait until ADC1 is ready
-    while(!ADCANCONbits.WKRDY2); // Wait until ADC2 is ready
+    while(!ADCANCONbits.WKRDY0);
+    while(!ADCANCONbits.WKRDY1);
 
-    // Enable ADC
-    ADCCON3bits.DIGEN0 = 1; // Enable ADC0
-    ADCCON3bits.DIGEN1 = 1; // Enable ADC1
-    ADCCON3bits.DIGEN2 = 1; // Enable ADC2
+    // Enable ADC - need this for each desired channel
+    ADCCON3bits.DIGEN0 = 1;
+    ADCCON3bits.DIGEN1 = 1;
+    ADCCON3bits.DIGEN2 = 1;
+    ADCCON3bits.DIGEN3 = 1;
+    ADCCON3bits.DIGEN4 = 1;
+
+    // Pin designations
+    TRISBbits.TRISB4 = 1;
+    ANSELBbits.ANSB4 = 1;
+
+    TRISBbits.TRISB0 = 1;
+    ANSELBbits.ANSB0 = 1;
+
+    TRISBbits.TRISB10 = 1;
+    ANSELBbits.ANSB10 = 1;
 }
 
 int getDataADC(int achannel){
@@ -119,6 +135,9 @@ int getDataADC(int achannel){
         case 0: return ADCDATA0;
         case 1: return ADCDATA1;
         case 2: return ADCDATA2;
+        case 3: return ADCDATA3;
+        case 4: return ADCDATA4;
+        case 5: return ADCDATA5;
     }
 }
 
@@ -133,9 +152,7 @@ int readFilteredADC(int achannel){
     ADCFLTR1bits.AFEN = 1; // Enable the filter
     ADCCON3bits.ADINSEL = achannel; // Channel to manually trigger
     ADCCON3bits.RQCNVRT = 1; // Manually trigger selected channel
-
     while(ADCFLTR1bits.AFRDY == 0); // Wait until oversampling is done
     ADCFLTR1bits.AFEN = 0; // Enable the digital filtering
-
     return ADCFLTR1bits.FLTRDATA;
 }

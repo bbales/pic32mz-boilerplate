@@ -54,9 +54,12 @@ void codecInit() {
     TRISDbits.TRISD11 = INPUT;
     SDI4R = 0b0011;
 
-    // CODEC SDI (PIC SDO @ RC13)
-    TRISBbits.TRISB3 = OUTPUT;
-    RPB3R = 0b1000;
+    // CODEC SDI (PIC SDO @ RD0) <-- Move to RD0 on next board
+    // TRISDbits.TRISD0 = OUTPUT;
+    // RPD0R = 0b1000;
+    TRISDbits.TRISD5 = OUTPUT;
+    RPD5R = 0b1000;
+
 
     // CODEC WS (PIC SS @ RD9)
     TRISDbits.TRISD9 = OUTPUT;
