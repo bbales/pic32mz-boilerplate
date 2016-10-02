@@ -10,15 +10,26 @@
 #include <stdio.h>
 #include "timers.h"
 #include "uart.h"
+#include "adc.h"
 
 // Timer1 handler
 int flip = 0;
+int res = 100;
+char str[20];
 void t1Handler(){
     flip = !flip;
     LATDbits.LATD4 = flip;
     IFS0bits.T1IF = 0; // Clear interrupt
 
-    uartSendString("test");
+    uartClearScreen();
+    res = readADC(2);
+    sprintf(str, "Pot 1: %d", res);
+    uartSendString(str);
+    uartNewline();
+
+    res = readADC(1);
+    sprintf(str, "Pot 2: %d", res);
+    uartSendString(str);
     uartNewline();
 }
 

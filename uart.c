@@ -7,7 +7,6 @@
 
 #include <xc.h>
 #include <sys/attribs.h>
-#include <proc/p32mz2048efg064.h>
 #include "uart.h"
 
 void uartInit() {

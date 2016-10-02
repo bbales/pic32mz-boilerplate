@@ -5,4 +5,5 @@ init.h  \
 audio.h  \
 delay.h  \
  timers.h  \
-uart.h 
+uart.h  \
+adc.h 

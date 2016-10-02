@@ -7,11 +7,13 @@
 #include "delay.h"
 #include "timers.h"
 #include "uart.h"
+#include "adc.h"
 
 int main(void) {
     oscInit();
     codecInit();
     uartInit();
+    adcInit();
 
     // Currently used for blink
     TRISDbits.TRISD4 = 0;
