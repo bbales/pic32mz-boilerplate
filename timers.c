@@ -14,7 +14,7 @@
 
 // Timer1 handler
 int flip = 0;
-int res = 100;
+int res = 0;
 char str[20];
 void t1Handler(){
     flip = !flip;
@@ -22,11 +22,6 @@ void t1Handler(){
     IFS0bits.T1IF = 0; // Clear interrupt
 
     uartClearScreen();
-
-    // res = readADC(2);
-    // sprintf(str, "Pot 1: %d", res);
-    // uartSendString(str);
-    // uartNewline();
 
     res = readFilteredADC(0);
     sprintf(str, "Pot 0: %d", res);
