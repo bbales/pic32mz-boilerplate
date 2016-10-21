@@ -8,6 +8,7 @@
 #include <xc.h>
 #include <sys/attribs.h>
 #include "audio.h"
+#include "timers.h"
 #include "delay.h"
 
 // var sinTable = []; for(var i = 0; i < 48; i++) sinTable[i] = Math.floor(Math.sin((i/48)*2*Math.PI)*2147483647)
@@ -158,20 +159,20 @@ void codecRW(){
         // left_output = sinTable[sinCount] >> 8;
 
         // Passthrough
-        left_output = left_input;
+        left_output = adc1 * (left_input/4096);
 
         // Read SPI4BUF
         left_input = SPI4BUF;
 
         // Convert to 32 Bit
-        // if(0b100000000000000000000000 & left_input){
-        //     left_input = 0b11111111000000000000000000000000 + left_input;
-        // }
+        if(0b100000000000000000000000 & left_input){
+            left_input = 0b11111111000000000000000000000000 + left_input;
+        }
 
         // Convert back to 24 bit
-        // if(0b10000000000000000000000000000000 & left_output){
-        //     left_output = 0b00000000111111111111111111111111 & left_output;
-        // }
+        if(0b10000000000000000000000000000000 & left_output){
+            left_output = 0b00000000111111111111111111111111 & left_output;
+        }
 
         // Write to SPI4BUF
         SPI4BUF = left_output;
@@ -179,20 +180,20 @@ void codecRW(){
         // right_output = sinTable[sinCount] >> 8;
 
         // Passthrough
-        right_output = right_input;
+        right_output = (right_input/3);
 
         // Read SPI4BUF
         right_input = SPI4BUF;
 
         // Convert to 32 Bit
-        // if(0b100000000000000000000000 & right_input){
-        //     right_input = 0b11111111000000000000000000000000 + right_input;
-        // }
+        if(0b100000000000000000000000 & right_input){
+            right_input = 0b11111111000000000000000000000000 + right_input;
+        }
 
         // Convert back to 24 bit
-        // if(0b10000000000000000000000000000000 & right_output){
-        //     right_output = 0b00000000111111111111111111111111 & right_output;
-        // }
+        if(0b10000000000000000000000000000000 & right_output){
+            right_output = 0b00000000111111111111111111111111 & right_output;
+        }
 
         // Write to SPI4BUF
         SPI4BUF = right_output;

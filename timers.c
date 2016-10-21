@@ -13,6 +13,7 @@
 #include "adc.h"
 
 // Timer1 handler
+int adc1 = 0;
 int flip = 0;
 int res = 0;
 char str[20];
@@ -24,6 +25,7 @@ void t1Handler(){
     uartClearScreen();
 
     res = readFilteredADC(0);
+    adc1 = res;
     sprintf(str, "Pot 0: %d", res);
     uartSendString(str);
     uartNewline();
@@ -139,14 +141,3 @@ void t2Init(){
 
     T2CONbits.ON = 1; // Enable timer 2
 }
-
-// int a1 = 0;
-// int a2 = 0;
-
-// void __ISR_AT_VECTOR(_TIMER_2_VECTOR, IPL5SRS) T2Interrupt(void) {
-   // a1 = !a1;
-   // LATEbits.LATE7 = a1;
-   // uartSendString("aur ");
-   // uartSendChar('b');
-   // IFS0bits.T2IF = 0; // Clear interrupt
-// }
