@@ -14,8 +14,6 @@ extern "C" {
 
 void initDSP();
 
-signed long DSPd(int channel, signed long sample);
-
 typedef struct DSPDelay{
     int step;
     int length;
