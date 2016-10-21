@@ -8,12 +8,14 @@
 #include "timers.h"
 #include "uart.h"
 #include "adc.h"
+#include "dsp.h"
 
 int main(void) {
     oscInit();
     codecInit();
     uartInit();
     adcInit();
+    initDSP();
 
     // Currently used for blink
     TRISDbits.TRISD4 = 0;

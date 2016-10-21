@@ -21,11 +21,11 @@ void t1Handler(){
     flip = !flip;
     LATDbits.LATD4 = flip;
     IFS0bits.T1IF = 0; // Clear interrupt
-
     uartClearScreen();
 
     res = readFilteredADC(0);
     adc1 = res;
+    return;
     sprintf(str, "Pot 0: %d", res);
     uartSendString(str);
     uartNewline();
