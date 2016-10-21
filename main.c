@@ -11,11 +11,11 @@
 #include "dsp.h"
 
 int main(void) {
+    initDSP();
     oscInit();
     codecInit();
     uartInit();
     adcInit();
-    initDSP();
 
     // Currently used for blink
     TRISDbits.TRISD4 = 0;

@@ -12,10 +12,6 @@
 #include "delay.h"
 #include "dsp.h"
 
-// var sinTable = []; for(var i = 0; i < 48; i++) sinTable[i] = Math.floor(Math.sin((i/48)*2*Math.PI)*2147483647)
-int sinTable[48] = {0, 280302863, 555809666, 821806412, 1073741823, 1307305213, 1518500249, 1703713324, 1859775392, 1984016187, 2074309916, 2129111626, 2147483647, 2129111626, 2074309916, 1984016187, 1859775392, 1703713324, 1518500249, 1307305213, 1073741823, 821806412, 555809666, 280302863, 0, -280302864, -555809667, -821806413, -1073741824, -1307305214, -1518500250, -1703713325, -1859775393, -1984016188, -2074309917, -2129111627, -2147483647, -2129111627, -2074309917, -1984016188, -1859775393, -1703713325, -1518500250, -1307305214, -1073741824, -821806413, -555809667, -280302864};
-int sinCount = 0;
-
 void codecEnable(int enable){
     // RST pin on CS4272
     TRISCbits.TRISC14 = OUTPUT;
@@ -155,10 +151,6 @@ void codecInit() {
 
 void codecRW(){
     if(channel){
-        // sinCount+=1;
-        // if(sinCount == 48) sinCount = 0;
-        // left_output = sinTable[sinCount] >> 8;
-
         // Passthrough
         left_output = d.func(channel, left_input);
 
@@ -178,8 +170,6 @@ void codecRW(){
         // Write to SPI4BUF
         SPI4BUF = left_output;
     }else{
-        // right_output = sinTable[sinCount] >> 8;
-
         // Passthrough
         right_output = d.func(channel, right_input);
 

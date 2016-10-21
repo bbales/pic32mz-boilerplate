@@ -20,6 +20,5 @@ signed long DSPd(int channel, signed long sample){
 }
 
 void initDSP(){
-    d = (DSPDelay) {.step = 0, .length = 5000, .decayNum = 97, .decayDenom = 100, .temp = 0};
-    d.func = DSPd;
+    d = (DSPDelay) {.func = DSPd, .step = 0, .length = 5000, .decayNum = 97, .decayDenom = 100, .temp = 0};
 }
