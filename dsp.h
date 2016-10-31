@@ -19,6 +19,7 @@ typedef struct DSPDelay{
     int length;
     int decayNum;
     int decayDenom;
+    signed long line[48000];
     signed long (*func)(int, signed long);
     signed long temp;
 } DSPDelay;

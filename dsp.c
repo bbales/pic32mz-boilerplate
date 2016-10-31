@@ -6,15 +6,16 @@
 */
 #include <xc.h>
 #include <sys/attribs.h>
+#include <float.h>
 #include "dsp.h"
 #include "audio.h"
 
-signed long delayLine[48000] = {0};
+ // = {0};
 
 signed long DSPdelayFunc(int channel, signed long sample){
     if(!channel) return 0;
     if(d.step >= d.length) d.step = 0;
-    d.temp = delayLine[d.step] = sample + d.decayNum*delayLine[d.step]/d.decayDenom;
+    d.temp = d.line[d.step] = sample + d.decayNum*d.line[d.step]/d.decayDenom;
     d.step++;
     return d.temp;
 }
@@ -25,8 +26,9 @@ void initDSP(){
         .func = DSPdelayFunc,
         .step = 0,
         .length = 5000,
-        .decayNum = 97,
+        .decayNum = 80,
         .decayDenom = 100,
-        .temp = 0
+        .temp = 0,
+        .line = {0}
     };
 }
