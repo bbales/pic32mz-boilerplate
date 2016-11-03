@@ -11,26 +11,25 @@
 #include "dsp.h"
 
 int main(void) {
-    initDSP();
+    dspInit();
     oscInit();
     codecInit();
     uartInit();
     adcInit();
+    t1Init();
+    // t2Init();
 
     // Currently used for blink
     TRISDbits.TRISD4 = 0;
 
-    t1Init();
-    // t2Init();
-
     while (1){
         left_output = 8;
         right_output = 8;
-        delay_ms(500);
-        LATDbits.LATD4 = 1;
-
-        delay_ms(500);
-        LATDbits.LATD4 = 0;
+        // delay_ms(500);
+        // LATDbits.LATD4 = 1;
+        //
+        // delay_ms(500);
+        // LATDbits.LATD4 = 0;
     }
 
     // Impossible!

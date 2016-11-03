@@ -12,32 +12,31 @@
 extern "C" {
 #endif
 
-void initDSP();
-
+void dspInit();
 
 typedef struct DSPDelay{
-    signed long (*func)(int, signed long);
+    long (*func)(char, long);
     int step;
     int length;
-    signed long decayNum;
-    signed long decayDenom;
-    signed long line[48000];
-    signed long temp;
+    long decayNum;
+    long decayDenom;
+    long line[48000];
+    long temp;
 } DSPDelay;
 
 DSPDelay d;
 
 typedef struct DSPLeakyIntegrator{
-    signed long (*func)(int, signed long);
-    signed long prevOutput;
-    signed long alpha;
-    signed long denom;
+    long (*func)(char, long);
+    long prevOutput;
+    long alpha;
+    long denom;
 } DSPLeakyIntegrator;
 
 DSPLeakyIntegrator leaky;
 
-signed long DSPLeakyIntegratorFunc(int channel, signed long sample);
-signed long DSPdelayFunc(int channel, signed long sample);
+long DSPLeakyIntegratorFunc(char channel, long sample);
+long DSPdelayFunc(char channel, long sample);
 
 #ifdef	__cplusplus
 }

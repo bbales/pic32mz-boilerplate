@@ -15,6 +15,49 @@
 #define C24TO32(num) ((0b100000000000000000000000 & num) ? 0b11111111000000000000000000000000 + num : num)
 #define C32TO24(num) ((0b10000000000000000000000000000000 & num) ? 0b00000000111111111111111111111111 & num : num)
 
+void codecRW(){
+    // Get ADC values
+    leaky.alpha = 90 + (long) adc1/410;
+
+    if(channel){
+        // Passthrough
+        left_output = leaky.func(channel, left_input);
+
+        // Read SPI4BUF
+        left_input = SPI4BUF;
+
+        // Convert to 32 Bit
+        left_input = C24TO32(left_input);
+
+        // Convert back to 24 bit
+        left_output = C32TO24(left_output);
+
+        // Write to SPI4BUF
+        SPI4BUF = left_output;
+    }else{
+        // Passthrough
+        right_output = leaky.func(channel, right_input);
+
+        // Read SPI4BUF
+        right_input = SPI4BUF;
+
+        // Convert to 32 Bit
+        right_input = C24TO32(right_input);
+
+        // Convert back to 24 bit
+        right_output = C32TO24(right_output);
+
+        // Write to SPI4BUF
+        SPI4BUF = right_output;
+    }
+
+    // Switch channels
+    channel = !channel;
+
+    // Clear interrupt flag
+    IFS5bits.SPI4RXIF = 0;
+}
+
 void codecEnable(int enable){
     // RST pin on CS4272
     TRISCbits.TRISC14 = OUTPUT;
@@ -150,47 +193,6 @@ void codecInit() {
 
     // Enable codec
     codecEnable(1);
-}
-
-void codecRW(){
-    if(channel){
-        leaky.alpha = 90 + (signed long) adc1/410;
-        // Passthrough
-        left_output = leaky.func(channel, left_input);
-
-        // Read SPI4BUF
-        left_input = SPI4BUF;
-
-        // Convert to 32 Bit
-        left_input = C24TO32(left_input);
-
-        // Convert back to 24 bit
-        left_output = C32TO24(left_output);
-
-        // Write to SPI4BUF
-        SPI4BUF = left_output;
-    }else{
-        // Passthrough
-        right_output = leaky.func(channel, right_input);
-
-        // Read SPI4BUF
-        right_input = SPI4BUF;
-
-        // Convert to 32 Bit
-        right_input = C24TO32(right_input);
-
-        // Convert back to 24 bit
-        right_output = C32TO24(right_output);
-
-        // Write to SPI4BUF
-        SPI4BUF = right_output;
-    }
-
-    // Switch channels
-    channel = !channel;
-
-    // Clear interrupt flag
-    IFS5bits.SPI4RXIF = 0;
 }
 
 void codecInitMCLK() {
