@@ -10,7 +10,11 @@
 #include "dsp.h"
 #include "audio.h"
 
- // = {0};
+signed long DSPLeakyIntegratorFunc(int channel, signed long sample){
+    if(!channel) return 0;
+    leaky.prevOutput = leaky.alpha*(leaky.prevOutput/leaky.denom) + (leaky.denom - leaky.alpha)*(sample/leaky.denom);
+    return leaky.prevOutput;
+}
 
 signed long DSPdelayFunc(int channel, signed long sample){
     if(!channel) return 0;
@@ -30,5 +34,12 @@ void initDSP(){
         .decayDenom = 100,
         .temp = 0,
         .line = {0}
+    };
+
+    leaky = (DSPLeakyIntegrator) {
+        .func = DSPLeakyIntegratorFunc,
+        .denom = 100,
+        .alpha = 0,
+        .prevOutput = 0
     };
 }

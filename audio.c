@@ -151,40 +151,33 @@ void codecInit() {
 
 void codecRW(){
     if(channel){
+        leaky.alpha = 90 + (signed long) adc1/410;
         // Passthrough
-        left_output = d.func(channel, left_input);
+        left_output = leaky.func(channel, left_input);
 
         // Read SPI4BUF
         left_input = SPI4BUF;
 
         // Convert to 32 Bit
-        if(0b100000000000000000000000 & left_input){
-            left_input = 0b11111111000000000000000000000000 + left_input;
-        }
+        if(0b100000000000000000000000 & left_input) left_input = 0b11111111000000000000000000000000 + left_input;
 
         // Convert back to 24 bit
-        if(0b10000000000000000000000000000000 & left_output){
-            left_output = 0b00000000111111111111111111111111 & left_output;
-        }
+        if(0b10000000000000000000000000000000 & left_output) left_output = 0b00000000111111111111111111111111 & left_output;
 
         // Write to SPI4BUF
         SPI4BUF = left_output;
     }else{
         // Passthrough
-        right_output = d.func(channel, right_input);
+        right_output = leaky.func(channel, right_input);
 
         // Read SPI4BUF
         right_input = SPI4BUF;
 
         // Convert to 32 Bit
-        if(0b100000000000000000000000 & right_input){
-            right_input = 0b11111111000000000000000000000000 + right_input;
-        }
+        if(0b100000000000000000000000 & right_input) right_input = 0b11111111000000000000000000000000 + right_input;
 
         // Convert back to 24 bit
-        if(0b10000000000000000000000000000000 & right_output){
-            right_output = 0b00000000111111111111111111111111 & right_output;
-        }
+        if(0b10000000000000000000000000000000 & right_output) right_output = 0b00000000111111111111111111111111 & right_output;
 
         // Write to SPI4BUF
         SPI4BUF = right_output;

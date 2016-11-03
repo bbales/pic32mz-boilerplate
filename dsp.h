@@ -14,17 +14,30 @@ extern "C" {
 
 void initDSP();
 
+
 typedef struct DSPDelay{
+    signed long (*func)(int, signed long);
     int step;
     int length;
-    int decayNum;
-    int decayDenom;
+    signed long decayNum;
+    signed long decayDenom;
     signed long line[48000];
-    signed long (*func)(int, signed long);
     signed long temp;
 } DSPDelay;
 
 DSPDelay d;
+
+typedef struct DSPLeakyIntegrator{
+    signed long (*func)(int, signed long);
+    signed long prevOutput;
+    signed long alpha;
+    signed long denom;
+} DSPLeakyIntegrator;
+
+DSPLeakyIntegrator leaky;
+
+signed long DSPLeakyIntegratorFunc(int channel, signed long sample);
+signed long DSPdelayFunc(int channel, signed long sample);
 
 #ifdef	__cplusplus
 }
