@@ -18,8 +18,8 @@ int flip = 0;
 int res = 0;
 char str[20];
 void t1Handler(){
-    flip = !flip;
-    LATDbits.LATD4 = flip;
+    // flip = !flip;
+    // LATDbits.LATD4 = flip;
     IFS0bits.T1IF = 0; // Clear interrupt
 
     res = readFilteredADC(0);
@@ -135,7 +135,6 @@ void t2Init(){
     IEC0bits.T2IE = 1; // Enable timer 2 interrupt
 
     PRISSbits.PRI6SS = 0b0110; // Shadow set 6
-    INTCONbits.MVEC = 1; // Enable multi-vectored interrupts
 
     asm volatile("ei"); // Enable interrupts
 

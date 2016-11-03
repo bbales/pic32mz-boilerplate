@@ -21,7 +21,7 @@ void codecRW(){
 
     if(channel){
         // Passthrough
-        left_output = leaky.func(channel, left_input);
+        left_output = d.func(channel, leaky.func(channel,left_input));
 
         // Read SPI4BUF
         left_input = SPI4BUF;
@@ -36,7 +36,7 @@ void codecRW(){
         SPI4BUF = left_output;
     }else{
         // Passthrough
-        right_output = leaky.func(channel, right_input);
+        right_output = d.func(channel, right_input);
 
         // Read SPI4BUF
         right_input = SPI4BUF;
@@ -201,7 +201,7 @@ void codecInitMCLK() {
     REFO1CONbits.ACTIVE = 0;
     REFO1CONbits.OE = 1;
     REFO1CONbits.ROSEL = 0b0111; // PLL
-    REFO1CONbits.RODIV = 0b000000000000100; // 8
+    REFO1CONbits.RODIV = 0b000000000001000; // 8
     REFO1TRIMbits.ROTRIM = 0b000100011;
     REFO1CONbits.ON = 1;
 }

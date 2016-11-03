@@ -8,17 +8,7 @@
 #include "init.h"
 
 void oscInit() {
-    OSCCONbits.CLKLOCK = 0;
-    OSCCONbits.DRMEN = 0;
-    OSCCONbits.FRCDIV = 0b000;
-    OSCCONbits.COSC = 0b111; // Start with FRC
-    OSCCONbits.SLPEN = 0;
-    OSCTUNbits.TUN = 0b000000;
-    PB1DIVbits.PBDIV = 0b0000001;
-    PB2DIVbits.ON = 0;
-
-    // Enable multi-vectored mode
-    INTCONbits.MVEC = 1;
+    
 }
 
 void memInit(){

@@ -9,15 +9,15 @@
 #pragma config FUSBIDIO = OFF
 
 // DEVCFG2
-#pragma config FPLLIDIV = 0b001   // System PLL Input Divider (8x Divider)
-#pragma config FPLLRNG = 0b001    // System PLL Input Range (34-68 MHz Input)
+#pragma config FPLLIDIV = 0b001   // System PLL Input Divider (2x Divider)
+#pragma config FPLLRNG = 0b001    // System PLL Input Range (5-10 MHz Input)
 #pragma config FPLLICLK = PLL_FRC // System PLL Input Clock Selection (FRC is
-#pragma config FPLLMULT = MUL_25  // System PLL Multiplier (PLL Multiply by 128)
-#pragma config FPLLODIV = 0b001 // System PLL Output Clock Divider (32x Divider)
+#pragma config FPLLMULT = MUL_50  // System PLL Multiplier (PLL Multiply by 25)
+#pragma config FPLLODIV = 0b000 // System PLL Output Clock Divider (2x Divider)
 #pragma config UPLLFSEL = FREQ_24MHZ // USB PLL Input Frequency Selection (USB PLL input is 24 MHz)
 
 // DEVCFG1
-#pragma config FNOSC = SPLL // Oscillator Selection Bits (Fast RC Osc w/Div-by-N (FRCDIV))
+#pragma config FNOSC = SPLL // Oscillator Selection Bits (SPLL)
 #pragma config DMTINTV = WIN_127_128 // DMT Count Window Interval
 #pragma config FSOSCEN = OFF // Secondary Oscillator Enable (Enable SOSC)
 #pragma config IESO = OFF    // Internal/External Switch Over (Enabled)

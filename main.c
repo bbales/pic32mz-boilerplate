@@ -11,20 +11,24 @@
 #include "dsp.h"
 
 int main(void) {
+    // Enable multi-vectored mode
+    INTCONbits.MVEC = 1;
+
+    // Initializations
     dspInit();
-    oscInit();
+    // oscInit();
     codecInit();
     uartInit();
     adcInit();
-    t1Init();
+    // t1Init();
     // t2Init();
 
     // Currently used for blink
     TRISDbits.TRISD4 = 0;
 
     while (1){
-        left_output = 8;
-        right_output = 8;
+        // left_output = 8;
+        // right_output = 8;
         // delay_ms(500);
         // LATDbits.LATD4 = 1;
         //

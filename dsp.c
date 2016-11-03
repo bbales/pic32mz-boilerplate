@@ -29,7 +29,7 @@ void dspInit(){
     d = (DSPDelay) {
         .func = DSPdelayFunc,
         .step = 0,
-        .length = 5000,
+        .length = 10000,
         .decayNum = 80,
         .decayDenom = 100,
         .temp = 0,
