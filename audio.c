@@ -12,6 +12,9 @@
 #include "delay.h"
 #include "dsp.h"
 
+#define C24TO32(num) ((0b100000000000000000000000 & num) ? 0b11111111000000000000000000000000 + num : num)
+#define C32TO24(num) ((0b10000000000000000000000000000000 & num) ? 0b00000000111111111111111111111111 & num : num)
+
 void codecEnable(int enable){
     // RST pin on CS4272
     TRISCbits.TRISC14 = OUTPUT;
@@ -159,10 +162,10 @@ void codecRW(){
         left_input = SPI4BUF;
 
         // Convert to 32 Bit
-        if(0b100000000000000000000000 & left_input) left_input = 0b11111111000000000000000000000000 + left_input;
+        left_input = C24TO32(left_input);
 
         // Convert back to 24 bit
-        if(0b10000000000000000000000000000000 & left_output) left_output = 0b00000000111111111111111111111111 & left_output;
+        left_output = C32TO24(left_output);
 
         // Write to SPI4BUF
         SPI4BUF = left_output;
@@ -174,10 +177,10 @@ void codecRW(){
         right_input = SPI4BUF;
 
         // Convert to 32 Bit
-        if(0b100000000000000000000000 & right_input) right_input = 0b11111111000000000000000000000000 + right_input;
+        right_input = C24TO32(right_input);
 
         // Convert back to 24 bit
-        if(0b10000000000000000000000000000000 & right_output) right_output = 0b00000000111111111111111111111111 & right_output;
+        right_output = C32TO24(right_output);
 
         // Write to SPI4BUF
         SPI4BUF = right_output;
