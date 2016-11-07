@@ -16,7 +16,6 @@ int main(void) {
 
     // Initializations
     dspInit();
-    // oscInit();
     codecInit();
     uartInit();
     adcInit();
@@ -27,13 +26,10 @@ int main(void) {
     TRISDbits.TRISD4 = 0;
 
     while (1){
-        // left_output = 8;
-        // right_output = 8;
-        // delay_ms(500);
-        // LATDbits.LATD4 = 1;
-        //
-        // delay_ms(500);
-        // LATDbits.LATD4 = 0;
+        delay_ms(500);
+        LATDbits.LATD4 = 1;
+        delay_ms(500);
+        LATDbits.LATD4 = 0;
     }
 
     // Impossible!

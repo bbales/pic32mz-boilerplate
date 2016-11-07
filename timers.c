@@ -18,10 +18,10 @@ int flip = 0;
 int res = 0;
 char str[20];
 void t1Handler(){
-    // flip = !flip;
-    // LATDbits.LATD4 = flip;
-    IFS0bits.T1IF = 0; // Clear interrupt
+    // Clear interrupt
+    IFS0bits.T1IF = 0;
 
+    // Read ADC
     res = readFilteredADC(0);
     adc1 = res;
     uartClearScreen();

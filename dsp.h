@@ -23,8 +23,7 @@ typedef struct DSPDelay{
     long line[48000];
     long temp;
 } DSPDelay;
-
-DSPDelay d;
+long DSPdelayFunc(char channel, long sample);
 
 typedef struct DSPLeakyIntegrator{
     long (*func)(char, long);
@@ -32,11 +31,11 @@ typedef struct DSPLeakyIntegrator{
     long alpha;
     long denom;
 } DSPLeakyIntegrator;
-
-DSPLeakyIntegrator leaky;
-
 long DSPLeakyIntegratorFunc(char channel, long sample);
-long DSPdelayFunc(char channel, long sample);
+
+// Instances of DSP objects
+DSPDelay d;
+DSPLeakyIntegrator leaky;
 
 #ifdef	__cplusplus
 }

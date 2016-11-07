@@ -8,7 +8,7 @@
 #include "init.h"
 
 void oscInit() {
-    
+    // Removed in favor of boot config
 }
 
 void memInit(){

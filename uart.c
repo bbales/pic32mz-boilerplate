@@ -42,6 +42,7 @@ void uartInit() {
     // No Parity, 1 Stop bit
     U1STASET = 0x9400; // Enable Transmit and Receive
 
+    // Enable all interrupts
     asm volatile("ei");
 }
 

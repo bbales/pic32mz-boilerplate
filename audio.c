@@ -12,9 +12,6 @@
 #include "delay.h"
 #include "dsp.h"
 
-#define C24TO32(num) ((0b100000000000000000000000 & num) ? 0b11111111000000000000000000000000 + num : num)
-#define C32TO24(num) ((0b10000000000000000000000000000000 & num) ? 0b00000000111111111111111111111111 & num : num)
-
 void codecRW(){
     // Get ADC values
     leaky.alpha = 90 + (long) adc1/410;

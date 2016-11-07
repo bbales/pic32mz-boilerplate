@@ -11,7 +11,7 @@
 #include "adc.h"
 
 void adcInit(){
-    // ADC1 does channels 0-31...
+    // ADC1 controls channel 0-31 on EFG064 devices...
 
     // Clear control registers
     ADCCON1 = 0;
