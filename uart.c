@@ -33,7 +33,7 @@ void uartInit() {
     IFS3bits.U1RXIF = 0; //! Clear Rx flag
 
     // Baud rate generator
-    U1BRG = 26;
+    U1BRG = 52;
     U1STA = 0;
 
     // Enable UART for 8-bit data

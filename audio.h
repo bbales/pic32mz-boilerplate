@@ -19,6 +19,8 @@ long left_output;
 long right_output;
 
 // CODEC protos
+long Q31multQ31 (long a, long b);
+
 void codecRW();
 void codecEnable(int enable);
 void codecInitMCLK();

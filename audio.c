@@ -12,6 +12,16 @@
 #include "delay.h"
 #include "dsp.h"
 
+long Q31multQ31 (long a, long b)
+{
+    long long y;
+    y = (long long) a * (long long) b;
+
+    y >> 31;
+
+    return ((long) y);
+}
+
 void codecRW(){
     // Get ADC values
     leaky.alpha = 90 + (long) adc1/410;
@@ -19,6 +29,7 @@ void codecRW(){
     if(channel){
         // Passthrough
         left_output = d.func(channel, leaky.func(channel,left_input));
+        // left_output = Q31multQ31(left_input, 0 | ((long) adc1 << 19));
 
         // Read SPI4BUF
         left_input = SPI4BUF;
