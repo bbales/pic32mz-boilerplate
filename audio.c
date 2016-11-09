@@ -7,9 +7,10 @@
 
 #include <xc.h>
 #include <sys/attribs.h>
+// /opt/microchip/xc32/v1.40/pic32-libs/include/
 #include <dsplib_def.h>
 #include "audio.h"
-#include "timers.h"
+#include "adc.h"
 #include "delay.h"
 #include "dsp.h"
 

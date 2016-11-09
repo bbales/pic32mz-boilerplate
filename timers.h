@@ -1,10 +1,6 @@
 #ifndef TIMERS_H
 #define TIMERS_H
 
-int adc1;
-long mini;
-long maxi;
-
 void t1Init();
 void t2Init();
 void t1Handler();

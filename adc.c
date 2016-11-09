@@ -10,6 +10,8 @@
 #include <stdio.h>
 #include "adc.h"
 
+int adc1 = 0;
+
 void adcInit(){
     // ADC1 controls channel 0-31 on EFG064 devices...
 

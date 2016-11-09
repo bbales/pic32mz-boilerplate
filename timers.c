@@ -13,11 +13,9 @@
 #include "adc.h"
 
 // Timer1 handler
-int adc1 = 0;
-long maxi = 0;
-int flip = 0;
 int res = 0;
 char str[20];
+
 void t1Handler(){
     // Clear interrupt
     IFS0bits.T1IF = 0;
@@ -26,7 +24,7 @@ void t1Handler(){
     res = readFilteredADC(0);
     adc1 = res;
     uartClearScreen();
-    sprintf(str, "Pot 0: %ld %ld", maxi);
+    sprintf(str, "Pot 0: %d", res);
     uartSendString(str);
     uartNewline();
     return;

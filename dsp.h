@@ -12,30 +12,45 @@
 extern "C" {
 #endif
 
+#include <dsplib_def.h>
+
 void dspInit();
 
 typedef struct DSPDelay{
-    long (*func)(char, long);
+    int32 (*func)(char, int32);
     int step;
     int length;
-    long decayNum;
-    long decayDenom;
-    long line[48000];
-    long temp;
+    int32 decayNum;
+    int32 decayDenom;
+    int32 line[48000];
+    int32 temp;
 } DSPDelay;
-long DSPdelayFunc(char channel, long sample);
+int32 DSPdelayFunc(char channel, int32 sample);
 
 typedef struct DSPLeakyIntegrator{
-    long (*func)(char, long);
-    long prevOutput;
-    long alpha;
-    long denom;
+    int32 (*func)(char, int32);
+    int32 prevOutput;
+    int32 alpha;
+    int32 denom;
 } DSPLeakyIntegrator;
-long DSPLeakyIntegratorFunc(char channel, long sample);
+int32 DSPLeakyIntegratorFunc(char channel, int32 sample);
+
+typedef struct DSPfirFilter{
+    int32 (*func)(char, int32);
+    int32 line[10];
+    int32 coeffs[10];
+    int32 acc;
+    int order;
+    int iterator;
+    long ptr;
+} DSPfirFilter;
+int32 DSPfirFilterFunc(char channel, int32 sample);
+int32 DSPfirFilterDelayLine(int32 x);
 
 // Instances of DSP objects
 DSPDelay d;
 DSPLeakyIntegrator leaky;
+DSPfirFilter fir;
 
 #ifdef	__cplusplus
 }
