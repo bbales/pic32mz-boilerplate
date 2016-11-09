@@ -2,6 +2,8 @@
 #define TIMERS_H
 
 int adc1;
+long mini;
+long maxi;
 
 void t1Init();
 void t2Init();

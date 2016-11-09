@@ -16,9 +16,7 @@ long Q31multQ31 (long a, long b)
 {
     long long y;
     y = (long long) a * (long long) b;
-
     y >> 31;
-
     return ((long) y);
 }
 
@@ -28,9 +26,11 @@ void codecRW(){
 
     if(channel){
         // Passthrough
-        left_output = d.func(channel, leaky.func(channel,left_input));
-        // left_output = Q31multQ31(left_input, 0 | ((long) adc1 << 19));
-
+        // left_output = d.func(channel, leaky.func(channel,left_input));
+        // left_output = Q31multQ31(left_input, adc1<< 8);
+        if(left_input > maxi) maxi = left_input;
+        if(left_input < mini) mini = left_input;
+        left_output = left_input;
         // Read SPI4BUF
         left_input = SPI4BUF;
 
@@ -44,7 +44,7 @@ void codecRW(){
         SPI4BUF = left_output;
     }else{
         // Passthrough
-        right_output = d.func(channel, right_input);
+        right_output = right_input;
 
         // Read SPI4BUF
         right_input = SPI4BUF;
