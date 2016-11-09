@@ -33,13 +33,12 @@ int32 DSPfirFilterDelayLine(int32 x){
 }
 
 int32 DSPfirFilterFunc(char channel, int32 sample){
-    int32 current = sample;
     if(!channel) return 0;
+    fir.current = sample;
     fir.acc = 0;
-
     for(fir.iterator = 0; fir.iterator < fir.order; fir.iterator++){
-        current = DSPfirFilterDelayLine(current);
-        fir.acc += mul32(current, fir.coeffs[fir.iterator]);
+        fir.current = DSPfirFilterDelayLine(fir.current);
+        fir.acc += mul32(fir.current, fir.coeffs[fir.order - 1 - fir.iterator]);
     }
 
     return fir.acc;
@@ -66,11 +65,12 @@ void dspInit(){
 
     fir = (DSPfirFilter) {
         .func = DSPfirFilterFunc,
-        .order = 10,
-        .coeffs = {0},
+        .order = 15,
+        .coeffs = {7583037,25866574,60529826,111924467,174087299,234926444,279656016,296129900,279656016, 234926444, 174087299, 111924467,60529826 , 25866574, 7583037},
         .line = {0},
         .ptr = 0,
         .acc = 0,
-        .iterator = 0
+        .iterator = 0,
+        .current = 0
     };
 }

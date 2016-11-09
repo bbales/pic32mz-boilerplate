@@ -7,10 +7,12 @@
 
 #include <xc.h>
 #include <sys/attribs.h>
+#include <dsplib_def.h>
 #include <stdio.h>
 #include "adc.h"
 
 int adc1 = 0;
+int32 maxi = 0;
 
 void adcInit(){
     // ADC1 controls channel 0-31 on EFG064 devices...

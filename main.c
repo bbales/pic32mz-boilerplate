@@ -19,7 +19,7 @@ int main(void) {
     codecInit();
     uartInit();
     adcInit();
-    t1Init();
+    // t1Init();
     // t2Init();
 
     // Currently used for blink

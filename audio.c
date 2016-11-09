@@ -16,12 +16,13 @@
 
 void codecRW(){
     // Get ADC values
-    leaky.alpha = 90 + (long) adc1/410;
+    // leaky.alpha = 90 + (long) adc1/410;
 
     if(channel){
-        // Passthrough
-        // left_output = d.func(channel, leaky.func(channel,left_input));
-        left_output = mul32(left_input, ((int32) adc1) << 19);
+        // left_output = fir.func(channel, left_input);
+        left_output = left_input;
+        // left_output = mul32(left_input, ((int32) adc1) << 19);
+        maxi = left_output;
 
         // Read SPI4BUF
         left_input = SPI4BUF;

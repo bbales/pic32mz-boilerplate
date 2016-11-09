@@ -13,6 +13,7 @@ extern "C" {
 #endif
 
 int adc1;
+int32 maxi;
 
 void adcInit();
 int readADC(int achannel);

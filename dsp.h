@@ -37,9 +37,10 @@ int32 DSPLeakyIntegratorFunc(char channel, int32 sample);
 
 typedef struct DSPfirFilter{
     int32 (*func)(char, int32);
-    int32 line[10];
-    int32 coeffs[10];
+    int32 line[15];
+    int32 coeffs[15];
     int32 acc;
+    int32 current;
     int order;
     int iterator;
     long ptr;

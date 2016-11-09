@@ -7,6 +7,7 @@
 
 #include <xc.h>
 #include <sys/attribs.h>
+#include <dsplib_def.h>
 #include <stdio.h>
 #include "timers.h"
 #include "uart.h"
@@ -24,7 +25,7 @@ void t1Handler(){
     res = readFilteredADC(0);
     adc1 = res;
     uartClearScreen();
-    sprintf(str, "Pot 0: %d", res);
+    sprintf(str, "Pot 0: %d %ld", res, maxi);
     uartSendString(str);
     uartNewline();
     return;
