@@ -14,7 +14,6 @@
 
 // Timer1 handler
 int adc1 = 0;
-long mini = 0;
 long maxi = 0;
 int flip = 0;
 int res = 0;
@@ -27,7 +26,7 @@ void t1Handler(){
     res = readFilteredADC(0);
     adc1 = res;
     uartClearScreen();
-    sprintf(str, "Pot 0: %ld %ld", maxi, mini);
+    sprintf(str, "Pot 0: %ld %ld", maxi);
     uartSendString(str);
     uartNewline();
     return;

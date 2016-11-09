@@ -7,18 +7,11 @@
 
 #include <xc.h>
 #include <sys/attribs.h>
+#include <dsplib_def.h>
 #include "audio.h"
 #include "timers.h"
 #include "delay.h"
 #include "dsp.h"
-
-long Q31multQ31 (long a, long b)
-{
-    long long y;
-    y = (long long) a * (long long) b;
-    y >> 31;
-    return ((long) y);
-}
 
 void codecRW(){
     // Get ADC values
@@ -27,10 +20,8 @@ void codecRW(){
     if(channel){
         // Passthrough
         // left_output = d.func(channel, leaky.func(channel,left_input));
-        // left_output = Q31multQ31(left_input, adc1<< 8);
-        if(left_input > maxi) maxi = left_input;
-        if(left_input < mini) mini = left_input;
-        left_output = left_input;
+        left_output = mul32(left_input, ((int32) adc1) << 19);
+
         // Read SPI4BUF
         left_input = SPI4BUF;
 

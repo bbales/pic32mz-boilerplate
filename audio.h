@@ -1,6 +1,8 @@
 #ifndef AUDIO_H
 #define AUDIO_H
 
+#include <dsplib_def.h>
+
 #define OUTPUT 0
 #define INPUT 1
 
@@ -13,13 +15,12 @@
 
 // Audio and sample variables
 char channel;
-long left_input;
-long right_input;
-long left_output;
-long right_output;
+int32 left_input;
+int32 right_input;
+int32 left_output;
+int32 right_output;
 
 // CODEC protos
-long Q31multQ31 (long a, long b);
 
 void codecRW();
 void codecEnable(int enable);
