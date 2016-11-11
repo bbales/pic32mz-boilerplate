@@ -15,6 +15,7 @@ extern "C" {
 #include <dsplib_def.h>
 
 void dspInit();
+int32 mul32custom(int32 a, int32 b);
 
 typedef struct DSPDelay{
     int32 (*func)(char, int32);
@@ -37,16 +38,17 @@ int32 DSPLeakyIntegratorFunc(char channel, int32 sample);
 
 typedef struct DSPfirFilter{
     int32 (*func)(char, int32);
-    int32 line[15];
-    int32 coeffs[15];
-    int32 acc;
+    int32 line[20];
+    int32 coeffs[20];
+    int64 acc;
+    int32 head;
     int32 current;
     int order;
+    int numCoeffs;
     int iterator;
     long ptr;
 } DSPfirFilter;
 int32 DSPfirFilterFunc(char channel, int32 sample);
-int32 DSPfirFilterDelayLine(int32 x);
 
 // Instances of DSP objects
 DSPDelay d;

@@ -19,8 +19,8 @@ void codecRW(){
     // leaky.alpha = 90 + (long) adc1/410;
 
     if(channel){
-        // left_output = fir.func(channel, left_input);
-        left_output = left_input;
+        left_output = fir.func(channel, left_input);
+        // left_output = left_input;
         // left_output = mul32(left_input, ((int32) adc1) << 19);
         maxi = left_output;
 
