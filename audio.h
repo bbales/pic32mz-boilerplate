@@ -13,17 +13,21 @@
 #define C24TO32(num) ((0b100000000000000000000000 & num) ? 0b11111111000000000000000000000000 + num : num)
 #define C32TO24(num) ((0b10000000000000000000000000000000 & num) ? 0b00000000111111111111111111111111 & num : num)
 
-// Audio and sample variables
-char channel;
-int32 left_input;
-int32 right_input;
-int32 left_output;
-int32 right_output;
+// CS4272 Codec struct
+typedef struct CS4272{
+    int32 leftIn;
+    int32 rightIn;
+    int32 leftOut;
+    int32 rightOut;
+    char channel;
+    void (*enable)(char);
+    void (*rw)();
+} CS4272;
+CS4272 codec;
 
 // CODEC protos
-
 void codecRW();
-void codecEnable(int enable);
+void codecEnable(char enable);
 void codecInitMCLK();
 void codecInit();
 

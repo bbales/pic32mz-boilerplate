@@ -14,52 +14,53 @@
 #include "delay.h"
 #include "dsp.h"
 
-void codecRW(){
-    // Get ADC values
-    // leaky.alpha = 90 + (long) adc1/410;
+//
+// *** Look into SPISGNEXT to remove bit conversion routines
+//
 
-    if(channel){
-        left_output = fir.func(channel, left_input);
-        // left_output = left_input;
-        // left_output = mul32(left_input, ((int32) adc1) << 19);
-        maxi = left_output;
+void codecRW(){
+    if(codec.channel){
+        codec.leftOut = fir.func(codec.channel, codec.leftIn);
+        maxi = codec.leftOut;
 
         // Read SPI4BUF
-        left_input = SPI4BUF;
+        codec.leftIn = SPI4BUF;
 
         // Convert to 32 Bit
-        left_input = C24TO32(left_input);
+        codec.leftIn = C24TO32(codec.leftIn);
 
         // Convert back to 24 bit
-        left_output = C32TO24(left_output);
+        codec.leftOut = C32TO24(codec.leftOut);
 
         // Write to SPI4BUF
-        SPI4BUF = left_output;
+        SPI4BUF = codec.leftOut;
+
+        // Switch channels
+        codec.channel = 0;
     }else{
         // Passthrough
-        right_output = right_input;
+        codec.rightOut = codec.rightIn;
 
         // Read SPI4BUF
-        right_input = SPI4BUF;
+        codec.rightIn = SPI4BUF;
 
         // Convert to 32 Bit
-        right_input = C24TO32(right_input);
+        codec.rightIn = C24TO32(codec.rightIn);
 
         // Convert back to 24 bit
-        right_output = C32TO24(right_output);
+        codec.rightOut = C32TO24(codec.rightOut);
 
         // Write to SPI4BUF
-        SPI4BUF = right_output;
+        SPI4BUF = codec.rightOut;
+
+        // Switch channels
+        codec.channel = 1;
     }
-
-    // Switch channels
-    channel = !channel;
-
     // Clear interrupt flag
     IFS5bits.SPI4RXIF = 0;
 }
 
-void codecEnable(int enable){
+void codecEnable(char enable){
     // RST pin on CS4272
     TRISCbits.TRISC14 = OUTPUT;
     if(enable){
@@ -71,17 +72,25 @@ void codecEnable(int enable){
 }
 
 void codecInit() {
+    // Initialize struct
+    codec = (CS4272){
+        .leftIn = 0,
+        .leftOut = 0,
+        .rightIn = 0,
+        .rightOut = 0,
+        .channel = 0,
+        .enable = codecEnable,
+        .rw = codecRW
+    }
+
     // Disable codec
-    codecEnable(0);
+    codec.enable(0);
 
     // Setup reference clocks for MCLK
     codecInitMCLK();
 
     // Initialize channel samples
-    left_input = 0;
-    right_input = 0;
-    left_output = 0;
-    right_output = 0;
+    codec.leftIn = codec.rightIn = codec.leftOut = codec.rightOut = 0;
 
     // Overlapping modules
     PMCONbits.ON = 0; // Disable PMCS2
@@ -105,7 +114,6 @@ void codecInit() {
     TRISDbits.TRISD5 = OUTPUT;
     RPD5R = 0b1000;
 
-
     // CODEC WS (PIC SS @ RD9)
     TRISDbits.TRISD9 = OUTPUT;
     RPD9R = 0b1000;
@@ -121,9 +129,11 @@ void codecInit() {
     // Set up SPI4 for I2S
     //
 
-    // Baud Rate - PBCLK / SPIBRG
-    SPI4BRG = 0b000000001; // 64 * Fs (384x Mode)  === 6,139,089 Hz
-    SPI4BUF = 0; // Clear Buffer
+    // Baud Rate - PBCLK / SPIBRG (64 * Fs (384x Mode)  === 6,139,089 Hz)
+    SPI4BRG = 0b000000001;
+
+    // Clear Buffer
+    SPI4BUF = 0;
 
     // Turn off SPI4 for config
     SPI4CONbits.ON = 0;
@@ -193,7 +203,7 @@ void codecInit() {
     asm volatile("ei");
 
     // Enable codec
-    codecEnable(1);
+    codec.enable(1);
 }
 
 void codecInitMCLK() {
