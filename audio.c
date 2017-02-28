@@ -20,8 +20,11 @@
 
 void codecRW(){
     if(codec.channel){
-        codec.leftOut = fir.func(codec.channel, codec.leftIn);
-        maxi = codec.leftOut;
+        // codec.leftOut = fir.func(codec.channel, codec.leftIn);
+        // maxi = codec.leftOut;
+        // Passthrough
+        // codec.leftOut = codec.leftIn;
+        codec.leftOut = codec.leftIn;
 
         // Read SPI4BUF
         codec.leftIn = SPI4BUF;
@@ -81,7 +84,7 @@ void codecInit() {
         .channel = 0,
         .enable = codecEnable,
         .rw = codecRW
-    }
+    };
 
     // Disable codec
     codec.enable(0);

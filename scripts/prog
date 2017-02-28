@@ -1,4 +1,4 @@
 Device PIC32MZ2048EFG064
 Hwtool PICkit3 -p BUR145251353
-Program "/home/bbales/projects/micro/brain2/brain2/dist/default/production/brain2.production.hex"
+Program "/home/bbales/Projects/pic32mz-boilerplate/dist/default/production/pic32mz-boilerplate.production.hex"
 Quit
