@@ -21,20 +21,18 @@ typedef struct DSPDelay{
     int32 (*func)(char, int32);
     int step;
     int length;
-    int32 decayNum;
-    int32 decayDenom;
+    double decay;
     int32 line[48000];
     int32 temp;
 } DSPDelay;
-int32 DSPdelayFunc(char channel, int32 sample);
+int32 DSPdelayFunc(int32 sample);
 
 typedef struct DSPLeakyIntegrator{
     int32 (*func)(char, int32);
     int32 prevOutput;
-    int32 alpha;
-    int32 denom;
+    double alpha;
 } DSPLeakyIntegrator;
-int32 DSPLeakyIntegratorFunc(char channel, int32 sample);
+int32 DSPLeakyIntegratorFunc(int32 sample);
 
 typedef struct DSPfirFilter{
     int32 (*func)(char, int32);
@@ -48,7 +46,7 @@ typedef struct DSPfirFilter{
     int iterator;
     long ptr;
 } DSPfirFilter;
-int32 DSPfirFilterFunc(char channel, int32 sample);
+int32 DSPfirFilterFunc(int32 sample);
 
 // Instances of DSP objects
 DSPDelay d;

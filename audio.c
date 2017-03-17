@@ -20,11 +20,9 @@
 
 void codecRW(){
     if(codec.channel){
-        // codec.leftOut = fir.func(codec.channel, codec.leftIn);
-        // maxi = codec.leftOut;
         // Passthrough
         // codec.leftOut = codec.leftIn;
-        codec.leftOut = codec.leftIn;
+        codec.leftOut = d.func(leaky.func(codec.leftIn));
 
         // Read SPI4BUF
         codec.leftIn = SPI4BUF;
@@ -41,8 +39,11 @@ void codecRW(){
         // Switch channels
         codec.channel = 0;
     }else{
+        // #### THIS IS CHANNEL A #### //
+
         // Passthrough
-        codec.rightOut = codec.rightIn;
+        // codec.rightOut = codec.rightIn;
+        codec.rightOut = 0;
 
         // Read SPI4BUF
         codec.rightIn = SPI4BUF;

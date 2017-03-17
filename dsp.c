@@ -16,22 +16,19 @@ int32 mul32custom(int32 a, int32 b){
     return ((int32) y >> 31);
 }
 
-int32 DSPLeakyIntegratorFunc(char channel, int32 sample){
-    if(!channel) return 0;
-    leaky.prevOutput = leaky.alpha*(leaky.prevOutput/leaky.denom) + (leaky.denom - leaky.alpha)*(sample/leaky.denom);
+int32 DSPLeakyIntegratorFunc(int32 sample){
+    leaky.prevOutput = leaky.alpha*(leaky.prevOutput) + (1.0 - leaky.alpha)*(sample);
     return leaky.prevOutput;
 }
 
-int32 DSPdelayFunc(char channel, int32 sample){
-    if(!channel) return 0;
+int32 DSPdelayFunc(int32 sample){
     if(d.step >= d.length) d.step = 0;
-    d.temp = d.line[d.step] = sample + d.decayNum*d.line[d.step]/d.decayDenom;
+    d.temp = d.line[d.step] = sample + d.decay*d.line[d.step];
     d.step++;
     return d.temp;
 }
 
-int32 DSPfirFilterFunc(char channel, int32 sample){
-    if(!channel) return 0;
+int32 DSPfirFilterFunc(int32 sample){
     fir.current = sample;
     fir.acc = 0;
     for(fir.iterator = 0; fir.iterator < fir.order; fir.iterator++){
@@ -50,9 +47,8 @@ void dspInit(){
     d = (DSPDelay) {
         .func = DSPdelayFunc,
         .step = 0,
-        .length = 10000,
-        .decayNum = 80,
-        .decayDenom = 100,
+        .length = 20000,
+        .decay = 0.6,
         .temp = 0,
         .line = {0}
     };
@@ -60,8 +56,7 @@ void dspInit(){
     // Leaky integrator
     leaky = (DSPLeakyIntegrator) {
         .func = DSPLeakyIntegratorFunc,
-        .denom = 100,
-        .alpha = 0,
+        .alpha = 0.2,
         .prevOutput = 0
     };
 
