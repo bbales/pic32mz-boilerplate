@@ -7,31 +7,22 @@
 
 #include <xc.h>
 #include <sys/attribs.h>
-// /opt/microchip/xc32/v1.40/pic32-libs/include/
 #include <dsplib_def.h>
 #include "audio.h"
 #include "adc.h"
 #include "delay.h"
 #include "dsp.h"
 
-//
-// *** Look into SPISGNEXT to remove bit conversion routines
-//
-
 void codecRW(){
     if(codec.channel){
+        // #### THIS IS CHANNEL B #### //
+
         // Passthrough
         // codec.leftOut = codec.leftIn;
         codec.leftOut = d.func(leaky.func(codec.leftIn));
 
         // Read SPI4BUF
         codec.leftIn = SPI4BUF;
-
-        // Convert to 32 Bit
-        codec.leftIn = C24TO32(codec.leftIn);
-
-        // Convert back to 24 bit
-        codec.leftOut = C32TO24(codec.leftOut);
 
         // Write to SPI4BUF
         SPI4BUF = codec.leftOut;
@@ -47,12 +38,6 @@ void codecRW(){
 
         // Read SPI4BUF
         codec.rightIn = SPI4BUF;
-
-        // Convert to 32 Bit
-        codec.rightIn = C24TO32(codec.rightIn);
-
-        // Convert back to 24 bit
-        codec.rightOut = C32TO24(codec.rightOut);
 
         // Write to SPI4BUF
         SPI4BUF = codec.rightOut;
@@ -166,7 +151,7 @@ void codecInit() {
     SPI4CONbits.MODE32 = 1;
 
     // Sign Extend Read data from RX FIFO bit 0 (This may be useful)
-    SPI4CON2bits.SPISGNEXT = 0;
+    SPI4CON2bits.SPISGNEXT = 1;
 
     // Ignore overflow and dont generate error events
     SPI4CON2bits.IGNROV = 1; // Ignore recieve overflow
