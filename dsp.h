@@ -12,6 +12,7 @@
 extern "C" {
 #endif
 
+#include <sys/attribs.h>
 #include <dsplib_def.h>
 
 #define TAPE_ENABLED 1
@@ -23,8 +24,8 @@ int32 mul32custom(int32 a, int32 b);
 typedef struct DSPDelay{
     int32 (*func)(int32);
     int step;
-    int length;
     double decay;
+    int length;
     int32 line[48000];
     int32 temp;
 } DSPDelay;
@@ -34,6 +35,7 @@ typedef struct DSPTapeDelay{
     int step;
     int32 sample;
     double decay;
+    int length;
     int32 line[48000];
     int32 temp;
 } DSPTapeDelay;
@@ -71,7 +73,7 @@ int32 DSPTapeDelayFunc(int32 sample);
 void DSPTapeDelayTimerFunc(void);
 
 DSPTapeDelay tapeDelay;
-void __ISR_AT_VECTOR(_TIMER_2_VECTOR, IPL1SRS) DSPTapeDelayTimerFunc(void);
+void __ISR_AT_VECTOR(_TIMER_2_VECTOR, IPL7SRS) DSPTapeDelayTimerFunc(void);
 #endif
 
 DSPLeakyIntegrator leaky;

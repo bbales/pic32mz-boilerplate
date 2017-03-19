@@ -12,10 +12,6 @@
 extern "C" {
 #endif
 
-double adc1;
-double adc2;
-int32 maxi;
-
 void adcInit();
 int readADC(int achannel);
 int readFilteredADC(int achannel);

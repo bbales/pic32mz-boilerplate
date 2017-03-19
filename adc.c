@@ -6,16 +6,10 @@
 */
 
 #include <xc.h>
-#include <sys/attribs.h>
-#include <dsplib_def.h>
-#include <stdio.h>
+
 #include "adc.h"
 
-double adc1 = 0;
-double adc2 = 0;
-int32 maxi = 0;
-
-void adcInit(){
+void adcInit() {
     // ADC1 controls channel 0-31 on EFG064 devices...
 
     // Clear control registers
@@ -49,20 +43,21 @@ void adcInit(){
     ADCFLTR3 = 0;
 
     // ADCCON1
-    ADCCON1bits.FRACT = 0; // Fractional Data Output Format (Integer)
-    ADCCON1bits.SELRES = 2; // ADC7 Resolution (10 bits)
-    ADCCON1bits.STRGSRC = 1; // Scan Trigger Source Select (Global Software Trigger (GSWTRG))
+    ADCCON1bits.FRACT = 0;   // Fractional Data Output Format (Integer)
+    ADCCON1bits.SELRES = 2;  // ADC7 Resolution (10 bits)
+    ADCCON1bits.STRGSRC = 1; // Scan Trig Source Select (Global Software Trigger (GSWTRG))
 
     // ADCCON2
-    ADCCON2bits.SAMC = 68; // ADC7 Sample Time (70 * Tad7)
+    ADCCON2bits.SAMC = 68;  // ADC7 Sample Time (70 * Tad7)
     ADCCON2bits.ADCDIV = 1; // ADC7 Clock Divider (Divide by 2)
 
     // ADCCON3
-    ADCCON3bits.ADCSEL = 0; // ADC Clock Source SYSCLK
+    ADCCON3bits.ADCSEL = 0;    // ADC Clock Source SYSCLK
     ADCCON3bits.CONCLKDIV = 1; // ADC Control Clock <Tq> Divider (Divide by 20)
-    ADCCON3bits.VREFSEL = 0; // Voltage Reference Input Selection (AVdd, AVss)
+    ADCCON3bits.VREFSEL = 0;   // Voltage Reference Input Selection (AVdd, AVss)
 
-    // Select ADC sample time and conversion clock, 10 bit res, sampling time of 5 * TADx
+    // Select ADC sample time and conversion clock, 10 bit res, sampling time of
+    // 5 * TADx
     ADC0TIMEbits.ADCDIV = 1;
     ADC0TIMEbits.SAMC = 5;
     ADC0TIMEbits.SELRES = 2;
@@ -77,9 +72,10 @@ void adcInit(){
     ADCFLTR1bits.DFMODE = 1; // Averaging mode
     ADCFLTR1bits.OVRSAM = 5; // 4 samples to be averaged, can try higher
     ADCFLTR1bits.AFGIEN = 1; // Interrupt enabled
-    ADCFLTR1bits.AFEN = 1; // Enable the filter
+    ADCFLTR1bits.AFEN = 1;   // Enable the filter
 
-    // Select analog input for ADC modules, no presync trigger, not sync sampling
+    // Select analog input for ADC modules, no presync trigger, not sync
+    // sampling
     ADCTRGMODE = 0;
 
     // Common scan select skip for input scan
@@ -103,8 +99,8 @@ void adcInit(){
     ADCCON1bits.ON = 1;
 
     // Let Vref stabilize
-    while(!ADCCON2bits.BGVRRDY);
-    while(ADCCON2bits.REFFLT);
+    while (!ADCCON2bits.BGVRRDY) continue;
+    while (ADCCON2bits.REFFLT) continue;
 
     // Enable clk to analog - need this for each desired channel
     ADCANCONbits.ANEN0 = 1;
@@ -114,8 +110,8 @@ void adcInit(){
     ADCANCONbits.ANEN4 = 1;
 
     // Wait for ADC ready
-    while(!ADCANCONbits.WKRDY0);
-    while(!ADCANCONbits.WKRDY1);
+    while (!ADCANCONbits.WKRDY0) continue;
+    while (!ADCANCONbits.WKRDY1) continue;
 
     // Enable ADC - need this for each desired channel
     ADCCON3bits.DIGEN0 = 1;
@@ -127,7 +123,6 @@ void adcInit(){
     // Pin designations
     TRISBbits.TRISB4 = 1;
     ANSELBbits.ANSB4 = 1;
-
 
     TRISBbits.TRISB10 = 1;
     ANSELBbits.ANSB10 = 1;
@@ -151,29 +146,35 @@ void adcInit(){
     // ANSELBbits.ANSB3 = 1;
 }
 
-int getDataADC(int achannel){
-    switch(achannel){
-        case 0: return ADCDATA0;
-        case 1: return ADCDATA1;
-        case 2: return ADCDATA2;
-        case 3: return ADCDATA3;
-        case 4: return ADCDATA4;
-        case 5: return ADCDATA5;
+int getDataADC(int achannel) {
+    switch (achannel) {
+    case 0:
+        return ADCDATA0;
+    case 1:
+        return ADCDATA1;
+    case 2:
+        return ADCDATA2;
+    case 3:
+        return ADCDATA3;
+    case 4:
+        return ADCDATA4;
+    case 5:
+        return ADCDATA5;
     }
 }
 
-int readADC(int achannel){
+int readADC(int achannel) {
     ADCCON3bits.GSWTRG = 1;
-    while(((ADCDSTAT1 >> achannel) | 1) == 0);
+    while (((ADCDSTAT1 >> achannel) | 1) == 0) continue;
     return getDataADC(achannel);
 }
 
-int readFilteredADC(int achannel){
-    ADCFLTR1bits.CHNLID = achannel; // Select channel 1
-    ADCFLTR1bits.AFEN = 1; // Enable the filter
-    ADCCON3bits.ADINSEL = achannel; // Channel to manually trigger
-    ADCCON3bits.RQCNVRT = 1; // Manually trigger selected channel
-    while(ADCFLTR1bits.AFRDY == 0); // Wait until oversampling is done
-    ADCFLTR1bits.AFEN = 0; // Enable the digital filtering
+int readFilteredADC(int achannel) {
+    ADCFLTR1bits.CHNLID = achannel;           // Select channel 1
+    ADCFLTR1bits.AFEN = 1;                    // Enable the filter
+    ADCCON3bits.ADINSEL = achannel;           // Channel to manually trigger
+    ADCCON3bits.RQCNVRT = 1;                  // Manually trigger selected channel
+    while (ADCFLTR1bits.AFRDY == 0) continue; // Wait until oversampling is done
+    ADCFLTR1bits.AFEN = 0;                    // Enable the digital filtering
     return ADCFLTR1bits.FLTRDATA;
 }

@@ -1,13 +1,14 @@
 #ifndef AUDIO_H
 #define AUDIO_H
 
-#include <dsplib_def.h>
+#include <dsplib_def.h> // Required for int32 type
+#include <sys/attribs.h> // Required for Interrups constants
 
 #define OUTPUT 0
 #define INPUT 1
 
-#define LEFT_CHANNEL 1
-#define RIGHT_CHANNEL 0
+#define CHANNEL_B 1
+#define CHANNEL_A 0
 
 // Twos complement 23/32 bit conversions
 #define C24TO32(num) ((0b100000000000000000000000 & num) ? 0b11111111000000000000000000000000 + num : num)

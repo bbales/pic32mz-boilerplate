@@ -5,13 +5,14 @@
 * @Last Modified time: 2016-03-08 17:44:28
 */
 #include <xc.h>
+
 #include "init.h"
 
 void oscInit() {
     // Removed in favor of boot config
 }
 
-void memInit(){
+void memInit() {
     // SDO3 on RB9
     TRISBbits.TRISB9 = 0;
 

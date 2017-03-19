@@ -12,6 +12,7 @@
       <itemPath>delay.h</itemPath>
       <itemPath>adc.h</itemPath>
       <itemPath>dsp.h</itemPath>
+      <itemPath>controls.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -28,6 +29,7 @@
       <itemPath>delay.c</itemPath>
       <itemPath>adc.c</itemPath>
       <itemPath>dsp.c</itemPath>
+      <itemPath>controls.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

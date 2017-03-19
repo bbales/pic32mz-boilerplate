@@ -6,7 +6,7 @@
 */
 
 #include <xc.h>
-#include <sys/attribs.h>
+
 #include "uart.h"
 
 void uartInit() {
@@ -28,9 +28,9 @@ void uartInit() {
 
     // Configure UART interrupts
     IPC28bits.U1TXIP = 0b000; //! Interrupt priority of 0
-    IPC28bits.U1TXIS = 0b00; //! Interrupt sub-priority of 0
-    IFS3bits.U1TXIF = 0; //! Clear Tx flag
-    IFS3bits.U1RXIF = 0; //! Clear Rx flag
+    IPC28bits.U1TXIS = 0b00;  //! Interrupt sub-priority of 0
+    IFS3bits.U1TXIF = 0;      //! Clear Tx flag
+    IFS3bits.U1RXIF = 0;      //! Clear Rx flag
 
     // Baud rate generator
     U1BRG = 52;
@@ -46,13 +46,13 @@ void uartInit() {
     asm volatile("ei");
 }
 
-void uartSendChar(char a){
+void uartSendChar(char a) {
     IFS3bits.U1TXIF = 0;
     U1TXREG = a;
-    while(!IFS3bits.U1TXIF);
+    while (!IFS3bits.U1TXIF) continue;
 }
 
-void uartSendString(char * s){
+void uartSendString(char *s) {
     int i = 0;
-    while(s[i] != '\0') uartSendChar(s[i++]);
+    while (s[i] != '\0') uartSendChar(s[i++]);
 }
