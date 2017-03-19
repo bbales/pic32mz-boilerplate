@@ -30,7 +30,9 @@ void t1Handler(){
             turn = 1;
             break;
         case 1:
-            adc2 = readFilteredADC(1)/4096.0;
+            // PR2 = readFilteredADC(1);
+            // PR2 = (readFilteredADC(1) >> 2) << 2;
+            // adc2 = readFilteredADC(1)/4096.0;
             // sprintf(str, "Pot 2: %f", adc2);
             turn = 0;
             break;
@@ -96,7 +98,7 @@ void t2Init(){
     // Peripheral Clock appears to be 25Mhz (50Mhz/2))
     T2CON = 0;
     T2CONbits.ON = 0; // Disable timer 2
-    T2CONbits.TCKPS = 3; // Input clock prescale select (1:256 (T2CLKIN = 31250 Hz))
+    T2CONbits.TCKPS = 0; // Input clock prescale select (1:256 (T2CLKIN = 31250 Hz))
     T2CONbits.TCS = 0; // Source is internal peripheral clock
     T2CONbits.T32 = 0; // Source is internal peripheral clock
 
@@ -108,7 +110,7 @@ void t2Init(){
     IFS0bits.T2IF = 0; // Clear interrupt flag
     IEC0bits.T2IE = 1; // Enable timer 2 interrupt
 
-    asm volatile("EI"); // Enable interrupts
     T2CONbits.ON = 1; // Enable timer 2
-    INTCONbits.MVEC = 1;
+    asm volatile("EI"); // Enable interrupts
+    // INTCONbits.MVEC = 1;
 }

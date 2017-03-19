@@ -71,7 +71,7 @@ int32 DSPTapeDelayFunc(int32 sample);
 void DSPTapeDelayTimerFunc(void);
 
 DSPTapeDelay tapeDelay;
-// void __ISR_AT_VECTOR(_TIMER_2_VECTOR,IPL3AUTO) DSPTapeDelayTimerFunc(void);
+void __ISR_AT_VECTOR(_TIMER_2_VECTOR, IPL1SRS) DSPTapeDelayTimerFunc(void);
 #endif
 
 DSPLeakyIntegrator leaky;

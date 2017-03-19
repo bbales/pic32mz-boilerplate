@@ -18,9 +18,10 @@ void codecRW(){
         // #### THIS IS CHANNEL B #### //
 
         // Passthrough
-        codec.leftOut = codec.leftIn;
+        // codec.leftOut = codec.leftIn;
         // delay.decay = adc1;
         // codec.leftOut = delay.func(codec.leftIn);
+        codec.leftOut = leaky.func(tapeDelay.func(codec.leftIn));
 
         // Read SPI4BUF
         codec.leftIn = SPI4BUF;
