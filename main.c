@@ -10,6 +10,10 @@
 #include "adc.h"
 #include "dsp.h"
 
+// Bypass vars
+int bypassCount = 0;
+unsigned int bounceState = 1;
+
 int main(void) {
     // Enable multi-vectored mode
     INTCONbits.MVEC = 1;
@@ -19,17 +23,31 @@ int main(void) {
     codecInit();
     uartInit();
     adcInit();
-    // t1Init();
+    t1Init();
     // t2Init();
 
-    // Currently used for blink
-    TRISDbits.TRISD4 = 0;
+    TRISBbits.TRISB11 = 0;
+    TRISBbits.TRISB12 = 0;
+    TRISBbits.TRISB14 = 1;
+    TRISBbits.TRISB15 = 1;
+    ANSELBbits.ANSB14 = 0;
+    ANSELBbits.ANSB15 = 0;
 
     while (1){
-        // delay_ms(500);
-        // LATDbits.LATD4 = 1;
-        // delay_ms(500);
-        // LATDbits.LATD4 = 0;
+        // Bypass Routine
+        if(PORTBbits.RB15){
+            if(!bypassCount && bounceState) {
+                LATBINV = 1 << 12;
+                bounceState = 0;
+            }
+            bypassCount = 300000;
+        }else{
+            if(!bounceState) bypassCount--;
+            if(!bypassCount) bounceState = 1;
+        }
+
+        // Tap LED
+        LATBbits.LATB11 = PORTBbits.RB14;
     }
 
     // Impossible!

@@ -19,6 +19,7 @@ void codecRW(){
 
         // Passthrough
         // codec.leftOut = codec.leftIn;
+        d.decay = adc1;
         codec.leftOut = d.func(leaky.func(codec.leftIn));
 
         // Read SPI4BUF

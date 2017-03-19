@@ -16,64 +16,32 @@
 // Timer1 handler
 int res = 0;
 char str[20];
+int turn = 0;
 
 void t1Handler(){
     // Clear interrupt
     IFS0bits.T1IF = 0;
-
-    // Read ADC
-    res = readFilteredADC(0);
-    adc1 = res;
-    uartClearScreen();
-    sprintf(str, "Pot 0: %d %ld", res, maxi);
-    uartSendString(str);
-    uartNewline();
     return;
+    switch(turn){
+        case 0:
+            uartClearScreen();
+            res = readFilteredADC(0);
+            adc1 = res/4096.0;
+            sprintf(str, "Pot 1: %f", adc1);
+            turn = 1;
+            break;
+        case 1:
+            res = readFilteredADC(1);
+            adc2 = res/4096.0;
+            sprintf(str, "Pot 2: %f", adc2);
+            turn = 0;
+            break;
+    }
 
-    res = readADC(0);
-    sprintf(str, "Pot 0: %d", res);
     uartSendString(str);
     uartNewline();
 
-    res = readFilteredADC(1);
-    sprintf(str, "Pot 1: %d", res);
-    uartSendString(str);
-    uartNewline();
-
-    res = readADC(1);
-    sprintf(str, "Pot 1: %d", res);
-    uartSendString(str);
-    uartNewline();
-
-    res = readFilteredADC(2);
-    sprintf(str, "Pot 2: %d", res);
-    uartSendString(str);
-    uartNewline();
-
-    res = readADC(2);
-    sprintf(str, "Pot 2: %d", res);
-    uartSendString(str);
-    uartNewline();
-
-    res = readFilteredADC(3);
-    sprintf(str, "Pot 3: %d", res);
-    uartSendString(str);
-    uartNewline();
-
-    res = readADC(3);
-    sprintf(str, "Pot 3: %d", res);
-    uartSendString(str);
-    uartNewline();
-
-    res = readFilteredADC(4);
-    sprintf(str, "Pot 4: %d", res);
-    uartSendString(str);
-    uartNewline();
-
-    res = readADC(4);
-    sprintf(str, "Pot 4: %d", res);
-    uartSendString(str);
-    uartNewline();
+    return;
 }
 
 // Timer 1 - Sampling

@@ -12,7 +12,8 @@
 extern "C" {
 #endif
 
-int adc1;
+double adc1;
+double adc2;
 int32 maxi;
 
 void adcInit();

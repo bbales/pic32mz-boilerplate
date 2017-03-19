@@ -14,3 +14,7 @@ This repository contains the boilerplate code for a DSP platform I am developing
 #### Building and Programming
 
 In order to avoid using MPLAB IDE, I have written a basic script in `scripts/prog`, this script takes advantage of the `mdb` tool to allow programming of the board using the command line. To build and program, run the command : `make && make program`
+
+#### Monitoring UART
+
+: `sudo minicom -b 115200 -o -D /dev/ttyUSB0`

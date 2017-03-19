@@ -11,7 +11,8 @@
 #include <stdio.h>
 #include "adc.h"
 
-int adc1 = 0;
+double adc1 = 0;
+double adc2 = 0;
 int32 maxi = 0;
 
 void adcInit(){
@@ -127,11 +128,27 @@ void adcInit(){
     TRISBbits.TRISB4 = 1;
     ANSELBbits.ANSB4 = 1;
 
-    TRISBbits.TRISB0 = 1;
-    ANSELBbits.ANSB0 = 1;
 
     TRISBbits.TRISB10 = 1;
     ANSELBbits.ANSB10 = 1;
+
+    // Works
+    TRISBbits.TRISB0 = 1;
+    ANSELBbits.ANSB0 = 1;
+
+    // Works
+    TRISBbits.TRISB1 = 1;
+    ANSELBbits.ANSB1 = 1;
+
+    //
+    CM2CONbits.ON = 0;
+    RPD2R = 0;
+    TRISBbits.TRISB2 = 1;
+    ANSELBbits.ANSB2 = 1;
+
+    // RPD3R = 0;
+    // TRISBbits.TRISB3 = 1;
+    // ANSELBbits.ANSB3 = 1;
 }
 
 int getDataADC(int achannel){
