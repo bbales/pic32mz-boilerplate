@@ -14,6 +14,9 @@ extern "C" {
 
 #include <dsplib_def.h>
 
+#define TAPE_ENABLED 1
+#define DELAY_ENABLED 0
+
 void dspInit();
 int32 mul32custom(int32 a, int32 b);
 
@@ -25,7 +28,16 @@ typedef struct DSPDelay{
     int32 line[48000];
     int32 temp;
 } DSPDelay;
-int32 DSPdelayFunc(int32 sample);
+
+typedef struct DSPTapeDelay{
+    int32 (*func)(int32);
+    int step;
+    int32 sample;
+    double decay;
+    int32 line[48000];
+    int32 temp;
+} DSPTapeDelay;
+
 
 typedef struct DSPLeakyIntegrator{
     int32 (*func)(int32);
@@ -49,7 +61,19 @@ typedef struct DSPfirFilter{
 int32 DSPfirFilterFunc(int32 sample);
 
 // Instances of DSP objects
-DSPDelay d;
+#if DELAY_ENABLED==1
+DSPDelay delay;
+int32 DSPDelayFunc(int32 sample);
+#endif
+
+#if TAPE_ENABLED==1
+int32 DSPTapeDelayFunc(int32 sample);
+void DSPTapeDelayTimerFunc(void);
+
+DSPTapeDelay tapeDelay;
+// void __ISR_AT_VECTOR(_TIMER_2_VECTOR,IPL3AUTO) DSPTapeDelayTimerFunc(void);
+#endif
+
 DSPLeakyIntegrator leaky;
 DSPfirFilter fir;
 

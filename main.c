@@ -5,10 +5,10 @@
 #include "init.h"
 #include "audio.h"
 #include "delay.h"
+#include "dsp.h"
 #include "timers.h"
 #include "uart.h"
 #include "adc.h"
-#include "dsp.h"
 
 // Bypass vars
 int bypassCount = 0;
@@ -24,14 +24,16 @@ int main(void) {
     uartInit();
     adcInit();
     t1Init();
-    // t2Init();
+    t2Init();
 
     TRISBbits.TRISB11 = 0;
     TRISBbits.TRISB12 = 0;
+    TRISBbits.TRISB9 = 0;
     TRISBbits.TRISB14 = 1;
     TRISBbits.TRISB15 = 1;
     ANSELBbits.ANSB14 = 0;
     ANSELBbits.ANSB15 = 0;
+    LATBbits.LATB9 = 1;
 
     while (1){
         // Bypass Routine

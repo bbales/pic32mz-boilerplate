@@ -21,12 +21,31 @@ int32 DSPLeakyIntegratorFunc(int32 sample){
     return leaky.prevOutput;
 }
 
-int32 DSPdelayFunc(int32 sample){
-    if(d.step >= d.length) d.step = 0;
-    d.temp = d.line[d.step] = sample + d.decay*d.line[d.step];
-    d.step++;
-    return d.temp;
+#if DELAY_ENABLED==1
+int32 DSPDelayFunc(int32 sample){
+    if(delay.step >= delay.length) delay.step = 0;
+    delay.temp = delay.line[delay.step] = sample + delay.decay*delay.line[delay.step];
+    delay.step++;
+    return delay.temp;
 }
+#endif
+
+#if TAPE_ENABLED==1
+int32 DSPTapeDelayFunc(int32 sample){
+    tapeDelay.sample = sample;
+    return tapeDelay.temp;
+}
+
+void DSPTapeDelayTimerFunc(void){
+    LATBbits.LATB8 = 0;
+    // LATBINV = 1 << 9;
+    // if(tapeDelay.step >= 48000) tapeDelay.step = 0;
+    // tapeDelay.temp = tapeDelay.line[tapeDelay.step] = sample + tapeDelay.decay*tapeDelay.line[tapeDelay.step];
+    // tapeDelay.step++;
+    // Clear interrupt
+    IFS0bits.T2IF = 0;
+}
+#endif
 
 int32 DSPfirFilterFunc(int32 sample){
     fir.current = sample;
@@ -43,15 +62,29 @@ int32 DSPfirFilterFunc(int32 sample){
 }
 
 void dspInit(){
-    // Delay
-    d = (DSPDelay) {
-        .func = DSPdelayFunc,
+    // Delay - Standard fixed rate buffer delay
+    #if DELAY_ENABLED==1
+    delay = (DSPDelay) {
+        .func = DSPDelayFunc,
         .step = 0,
         .length = 20000,
         .decay = 0.6,
         .temp = 0,
         .line = {0}
     };
+    #endif
+
+    // Tape Delay - variable rate buffer delay
+    #if TAPE_ENABLED==1
+    tapeDelay = (DSPTapeDelay){
+        .func = DSPTapeDelayFunc,
+        .step = 0,
+        .sample = 0,
+        .decay = 0.6,
+        .temp = 0,
+        .line = {0}
+    };
+    #endif
 
     // Leaky integrator
     leaky = (DSPLeakyIntegrator) {
