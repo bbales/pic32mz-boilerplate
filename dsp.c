@@ -39,7 +39,8 @@ int32 DSPTapeDelayFunc(int32 sample) {
 void DSPTapeDelayTimerFunc(void) {
     // if (tapeDelay.step == 1) LATBINV = 1 << 9;
     tapeDelay.line[tapeDelay.step] =
-        tapeDelay.sample + tapeDelay.decay * tapeDelay.line[tapeDelay.step++];
+        tapeDelay.sample + tapeDelay.decay * tapeDelay.line[tapeDelay.step];
+    tapeDelay.step++;
     if (tapeDelay.step >= tapeDelay.length) tapeDelay.step = 0;
     // Clear interrupt
     IFS0bits.T2IF = 0;

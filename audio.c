@@ -14,7 +14,6 @@
 void codecRW() {
     if (codec.channel == CHANNEL_B) {
         // Processing
-        // tapeDelay.decay = adc1;
         codec.leftOut = leaky.func(tapeDelay.func(codec.leftIn));
         // codec.leftOut = codec.leftIn;
 

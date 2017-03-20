@@ -25,6 +25,7 @@ int main(void) {
 
     while (1) {
         checkBypass();
+        checkSubdiv();
         checkTap();
     }
 
