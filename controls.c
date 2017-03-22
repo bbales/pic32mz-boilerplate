@@ -3,11 +3,13 @@
 
 #include "controls.h"
 #include "adc.h"
+#include "audio.h"
 #include "dsp.h"
 
 void controlsInit() {
-    // Tap LED
-    TRISBbits.TRISB11 = 0;
+    // Tap LEDs
+    TRISEbits.TRISE6 = 0;
+    TRISEbits.TRISE7 = 0;
 
     // Bypass LED
     TRISBbits.TRISB12 = 0;
@@ -40,25 +42,36 @@ void controlsInit() {
 // Tap
 unsigned long long audioCycles = 0;
 int pr2 = 0;
+int tapHasBeenUp = 1;
+int tapFlip = 0;
+int trueTap = 0;
+int subTap = 0;
 
 void checkTap() {
     // Audio cycles updates 96000 times a second
-    if (TAP_SW_R && audioCycles > 9600) {
-        pr2 = 0.00512 * audioCycles;
-        audioCycles = 0;
-        //
-        // Formula is ((PBCLK/CLKDIV)/ (tdlen * fcodec)) * lastTap
-        // PBCLK = 945000000
-        // CLKDIV = 1 -> 256
-        // fcodec = 96000
-        // tdlen = 48000
-        // At clkdiv = 1 => 0.0205 * lastTap
-        //
-        PR2 = pr2 / subdiv;
+    if (TAP_SW_R && tapHasBeenUp) {
+        tapHasBeenUp = 0;
+        if (audioCycles > 20000) {
+            pr2 = 0.00512 * audioCycles;
+            audioCycles = 0;
+            //
+            // Formula is ((PBCLK/CLKDIV)/ (tdlen * fcodec)) * lastTap
+            // PBCLK = 945000000
+            // CLKDIV = 1 -> 256
+            // fcodec = 96000
+            // tdlen = 48000
+            // At clkdiv = 1 => 0.0205 * lastTap
+            //
+            PR2 = pr2 / subdiv;
+            LATESET = 3 << 6;
+            tapFlip = 0;
+        }
+    } else {
+        tapHasBeenUp = 1;
     }
 
-    // Tap LED
-    TAP_LIGHT_W = tapeDelay.step < tapeDelay.length * 0.2;
+    LATEbits.LATE6 = trueTap >= 0;
+    LATEbits.LATE7 = subTap >= 0;
 }
 
 // Bypass

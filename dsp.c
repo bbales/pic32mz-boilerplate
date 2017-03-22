@@ -10,6 +10,7 @@
 
 #include "dsp.h"
 #include "audio.h"
+#include "controls.h"
 
 int32 mul32custom(int32 a, int32 b) {
     int64 y = (int64) a * (int64) b;
@@ -37,11 +38,24 @@ int32 DSPTapeDelayFunc(int32 sample) {
 }
 
 void DSPTapeDelayTimerFunc(void) {
-    // if (tapeDelay.step == 1) LATBINV = 1 << 9;
+    trueTap--;
+    subTap--;
     tapeDelay.line[tapeDelay.step] =
         tapeDelay.sample + tapeDelay.decay * tapeDelay.line[tapeDelay.step];
     tapeDelay.step++;
-    if (tapeDelay.step >= tapeDelay.length) tapeDelay.step = 0;
+    if (tapeDelay.step >= tapeDelay.length) {
+        tapeDelay.step = 0;
+
+        // Tap LEDs
+        subTap = tapeDelay.length * 0.2;
+        if (tapFlip >= subdiv - 1) {
+            tapFlip = 0;
+            trueTap = subTap * subdiv;
+        } else {
+            tapFlip++;
+        }
+    }
+
     // Clear interrupt
     IFS0bits.T2IF = 0;
 }

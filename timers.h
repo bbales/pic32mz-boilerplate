@@ -3,5 +3,6 @@
 
 void t1Init();
 void t2Init();
+void t3Init();
 
 #endif

@@ -15,7 +15,6 @@ void codecRW() {
     if (codec.channel == CHANNEL_B) {
         // Processing
         codec.leftOut = leaky.func(tapeDelay.func(codec.leftIn));
-        // codec.leftOut = codec.leftIn;
 
         // Read SPI4BUF
         codec.leftIn = SPI4BUF;

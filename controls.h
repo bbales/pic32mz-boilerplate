@@ -8,13 +8,16 @@ extern "C" {
 #define BYPASS_SW_R PORTBbits.RB15
 #define SUBDIV_SW_R PORTBbits.RB13
 
-#define TAP_LIGHT_W LATBbits.LATB11
+#define TAP_LIGHT_W LATEbits.LATE6
+#define TAP_LIGHT_TRUE_W LATEbits.LATE7
 #define BYPASS_W LATBbits.LATB12
 
 // Tap
 extern unsigned long long audioCycles;
-int pr2;
 void checkTap();
+int trueTap;
+int subTap;
+int tapFlip;
 
 // Initialize Controls
 void controlsInit();
@@ -26,8 +29,8 @@ void checkBypass();
 
 // Subdivision
 int bypassCount;
-unsigned int bounceState;
 unsigned short subdiv;
+unsigned int subdivState;
 void checkSubdiv();
 
 // Potentiometer stuff

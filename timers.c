@@ -55,3 +55,25 @@ void t2Init() {
 
     asm volatile("EI"); // Enable interrupts
 }
+
+// Timer 3 - Tap Light
+void t3Init() {
+    asm volatile("DI"); // Disable interrupts
+
+    T3CON = 0;           // Clear Timer 3 config
+    T3CONbits.ON = 0;    // Disable timer 3
+    T3CONbits.TCKPS = 2; // Input clock prescale select (1:256 (T3CLKIN = 31250 Hz))
+    T3CONbits.TCS = 0;   // Source is internal peripheral clock
+
+    PR3 = 64000; // Timer 3 period
+    TMR3 = 0;    // Clear timer 3 counter
+
+    IPC3bits.T3IP = 5; // Interrupt priority
+    IPC3bits.T3IS = 1; // Sub-priority 3
+    IFS0bits.T3IF = 0; // Clear interrupt flag
+    IEC0bits.T3IE = 1; // Enable timer 3 interrupt
+
+    T3CONbits.ON = 1; // Enable timer 3
+
+    asm volatile("EI"); // Enable interrupts
+}
