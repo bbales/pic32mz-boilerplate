@@ -12,6 +12,9 @@ extern "C" {
 #define TAP_LIGHT_TRUE_W LATEbits.LATE7
 #define BYPASS_W LATBbits.LATB12
 
+double wet;
+double dry;
+
 // Tap
 extern unsigned long long audioCycles;
 void checkTap();

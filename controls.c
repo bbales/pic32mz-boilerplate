@@ -131,6 +131,8 @@ void checkSubdiv() {
 
 // Potentiometer stuff
 int turn = 0;
+double wet = 0.0;
+double dry = 0.0;
 
 // Timer1 handler
 void readPots(void) {
@@ -141,6 +143,11 @@ void readPots(void) {
         break;
     case 1:
         leaky.alpha = readFilteredADC(1) / 4096.0;
+        turn = 2;
+        break;
+    case 2:
+        dry = readFilteredADC(2) / 4096.0;
+        wet = 1 - dry;
         turn = 0;
         break;
     }

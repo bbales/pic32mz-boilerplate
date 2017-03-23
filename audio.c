@@ -14,7 +14,7 @@
 void codecRW() {
     if (codec.channel == CHANNEL_B) {
         // Processing
-        codec.leftOut = leaky.func(tapeDelay.func(codec.leftIn));
+        codec.leftOut = dry * codec.leftIn + wet * leaky.func(tapeDelay.func(codec.leftIn));
 
         // Read SPI4BUF
         codec.leftIn = SPI4BUF;
@@ -91,6 +91,8 @@ void codecInit() {
     // RPD0R = 0b1000;
     TRISDbits.TRISD5 = OUTPUT;
     RPD5R = 0b1000;
+    // TRISDbits.TRISD0 = OUTPUT;
+    // RPD0R = 0b1000;
 
     // CODEC WS (PIC SS @ RD9)
     TRISDbits.TRISD9 = OUTPUT;
