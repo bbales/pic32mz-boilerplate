@@ -7,37 +7,31 @@ extern "C" {
 #define TAP_SW_R PORTBbits.RB14
 #define BYPASS_SW_R PORTBbits.RB15
 #define SUBDIV_SW_R PORTBbits.RB13
+#define TIME_SW_R1 PORTBbits.RB11
+#define TIME_SW_R0 PORTBbits.RB10
 
 #define TAP_LIGHT_W LATEbits.LATE6
 #define TAP_LIGHT_TRUE_W LATEbits.LATE7
 #define BYPASS_W LATBbits.LATB12
 
-double wet;
-double dry;
-
 // Tap
 extern unsigned long long audioCycles;
-void checkTap();
 int trueTap;
 int subTap;
-int tapFlip;
+char tapFlip;
+void checkTap();
 
 // Initialize Controls
 void controlsInit();
 
 // Bypass
-int bypassCount;
-unsigned int bounceState;
 void checkBypass();
 
 // Subdivision
-int bypassCount;
-unsigned short subdiv;
-unsigned int subdivState;
+char subdiv;
 void checkSubdiv();
 
 // Potentiometer stuff
-int turn;
 void readPots(void);
 void __ISR_AT_VECTOR(_TIMER_1_VECTOR, IPL6SRS) readPots(void);
 

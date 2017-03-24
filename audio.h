@@ -20,6 +20,8 @@ typedef struct CS4272{
     int32 rightIn;
     int32 leftOut;
     int32 rightOut;
+    double wet;
+    double dry;
     char channel;
     void (*enable)(char);
     void (*rw)();

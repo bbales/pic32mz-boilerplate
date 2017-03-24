@@ -30,6 +30,19 @@ void controlsInit() {
     CNPDBbits.CNPDB15 = 1;
     ANSELBbits.ANSB15 = 0;
 
+    // // Time Select Switch
+    // TRISBbits.TRISB11 = 1;
+    // CNPDBbits.CNPDB11 = 1;
+    // ANSELBbits.ANSB11 = 0;
+    //
+    // TRISBbits.TRISB10 = 1;
+    // CNPDBbits.CNPDB10 = 1;
+    // ANSELBbits.ANSB10 = 0;
+    //
+    // // More LEDs
+    // TRISECLR = 0b111 << 1;
+    // LATESET = 0b111 << 1;
+
     // Subdiv LEDs
     // RG6 : Thirty-second note 8:1
     // RG7 : Sixteenth note 4:1
@@ -42,15 +55,15 @@ void controlsInit() {
 // Tap
 unsigned long long audioCycles = 0;
 int pr2 = 0;
-int tapHasBeenUp = 1;
-int tapFlip = 0;
 int trueTap = 0;
 int subTap = 0;
+char tapFlip = 0;
+char tapBounce = 1;
 
 void checkTap() {
     // Audio cycles updates 96000 times a second
-    if (TAP_SW_R && tapHasBeenUp) {
-        tapHasBeenUp = 0;
+    if (TAP_SW_R && tapBounce) {
+        tapBounce = 0;
         if (audioCycles > 20000) {
             pr2 = 0.00512 * audioCycles;
             audioCycles = 0;
@@ -67,7 +80,7 @@ void checkTap() {
             tapFlip = 0;
         }
     } else {
-        tapHasBeenUp = 1;
+        tapBounce = 1;
     }
 
     LATEbits.LATE6 = trueTap >= 0;
@@ -75,31 +88,37 @@ void checkTap() {
 }
 
 // Bypass
-int bypassCount = 0;
-unsigned int bounceState = 1;
+unsigned int bypassCount = 0;
+char bypassBounce = 1;
 
 void checkBypass() {
     // Bypass Routine
     if (BYPASS_SW_R) {
-        if (!bypassCount && bounceState) {
+        if (!bypassCount && bypassBounce) {
             LATBINV = 1 << 12;
-            bounceState = 0;
+            bypassBounce = 0;
         }
         bypassCount = 50000;
     } else {
-        if (!bounceState) bypassCount--;
-        if (!bypassCount) bounceState = 1;
+        if (!bypassBounce) bypassCount--;
+        if (!bypassCount) bypassBounce = 1;
     }
 }
 
 // Subdivision
-int subdivCount = 0;
-unsigned int subdivState = 1;
-unsigned short subdiv = 1;
+char subdivBounce = 1;
+unsigned int subdivCount = 0;
+char subdiv = 1;
+
+short timeState = 0;
 
 void checkSubdiv() {
+    // Subdiv switch has been pressed
     if (SUBDIV_SW_R) {
-        if (!subdivCount && subdivState) {
+        // Minimum countdown has elapsed
+        // + button has returned to rest before being pressed again
+        if (!subdivCount && subdivBounce) {
+            // Clear all subdiv LEDs
             LATGCLR = 0b1111 << 6;
             switch (subdiv) {
             case 1:
@@ -120,19 +139,23 @@ void checkSubdiv() {
                 break;
             }
             PR2 = pr2 / subdiv;
-            subdivState = 0;
+            subdivBounce = 0;
         }
         subdivCount = 50000;
     } else {
-        if (!subdivState) subdivCount--;
-        if (!subdivCount) subdivState = 1;
+        if (!subdivBounce) subdivCount--;
+        if (!subdivCount) subdivBounce = 1;
     }
+
+    // Time Switch LEDs
+    // timeState = TIME_SW_R1 + 2 * TIME_SW_R0;
+    // LATEbits.LATE1 = timeState == 2;
+    // LATEbits.LATE2 = timeState == 1;
+    // LATEbits.LATE3 = timeState == 0;
 }
 
 // Potentiometer stuff
-int turn = 0;
-double wet = 0.0;
-double dry = 0.0;
+char turn = 0;
 
 // Timer1 handler
 void readPots(void) {
@@ -146,8 +169,8 @@ void readPots(void) {
         turn = 2;
         break;
     case 2:
-        dry = readFilteredADC(2) / 4096.0;
-        wet = 1 - dry;
+        codec.dry = readFilteredADC(2) / 4096.0;
+        codec.wet = 1.0 - codec.dry;
         turn = 0;
         break;
     }
