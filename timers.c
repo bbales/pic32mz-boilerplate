@@ -19,6 +19,7 @@ void t1Init() {
     T1CONbits.TCS = 0;   // Source is internal periph bus clock
 
     PR1 = 20000; // Timer 1 period
+    PR1 = 13000; // Timer 1 period
     TMR1 = 0;    // Clear timer 1 counter
 
     IPC1bits.T1IP = 6; // Interrupt priority 6

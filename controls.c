@@ -40,8 +40,8 @@ void controlsInit() {
     // ANSELBbits.ANSB10 = 0;
     //
     // // More LEDs
-    // TRISECLR = 0b111 << 1;
-    // LATESET = 0b111 << 1;
+    TRISECLR = 0b111 << 1;
+    LATESET = 0b111 << 1;
 
     // Subdiv LEDs
     // RG6 : Thirty-second note 8:1
@@ -156,6 +156,7 @@ void checkSubdiv() {
 
 // Potentiometer stuff
 char turn = 0;
+int adc3 = 0;
 
 // Timer1 handler
 void readPots(void) {
@@ -171,7 +172,12 @@ void readPots(void) {
     case 2:
         codec.dry = readFilteredADC(2) / 4096.0;
         codec.wet = 1.0 - codec.dry;
+        turn = 3;
+        break;
+    case 3:
+        adc3 = readADC(4);
         turn = 0;
+        LATEbits.LATE3 = adc3 > 2000;
         break;
     }
 

@@ -135,15 +135,17 @@ void adcInit() {
     TRISBbits.TRISB1 = 1;
     ANSELBbits.ANSB1 = 1;
 
-    //
+    // Works
     CM2CONbits.ON = 0;
     RPD2R = 0;
     TRISBbits.TRISB2 = 1;
     ANSELBbits.ANSB2 = 1;
 
-    // RPD3R = 0;
-    // TRISBbits.TRISB3 = 1;
-    // ANSELBbits.ANSB3 = 1;
+    //
+    CM1CONbits.ON = 0;
+    RPD4R = 0;
+    TRISBbits.TRISB4 = 1;
+    ANSELBbits.ANSB4 = 1;
 }
 
 int getDataADC(int achannel) {
