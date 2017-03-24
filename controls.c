@@ -30,16 +30,16 @@ void controlsInit() {
     CNPDBbits.CNPDB15 = 1;
     ANSELBbits.ANSB15 = 0;
 
-    // // Time Select Switch
-    // TRISBbits.TRISB11 = 1;
-    // CNPDBbits.CNPDB11 = 1;
-    // ANSELBbits.ANSB11 = 0;
-    //
-    // TRISBbits.TRISB10 = 1;
-    // CNPDBbits.CNPDB10 = 1;
-    // ANSELBbits.ANSB10 = 0;
-    //
-    // // More LEDs
+    // Time Select Switch
+    TRISBbits.TRISB11 = 1;
+    CNPDBbits.CNPDB11 = 1;
+    ANSELBbits.ANSB11 = 0;
+
+    TRISBbits.TRISB10 = 1;
+    CNPDBbits.CNPDB10 = 1;
+    ANSELBbits.ANSB10 = 0;
+
+    // More LEDs
     TRISECLR = 0b111 << 1;
     LATESET = 0b111 << 1;
 
@@ -148,10 +148,10 @@ void checkSubdiv() {
     }
 
     // Time Switch LEDs
-    // timeState = TIME_SW_R1 + 2 * TIME_SW_R0;
-    // LATEbits.LATE1 = timeState == 2;
-    // LATEbits.LATE2 = timeState == 1;
-    // LATEbits.LATE3 = timeState == 0;
+    timeState = TIME_SW_R1 + 2 * TIME_SW_R0;
+    LATEbits.LATE1 = timeState == 2;
+    LATEbits.LATE2 = timeState == 1;
+    LATEbits.LATE3 = timeState == 0;
 }
 
 // Potentiometer stuff
@@ -175,9 +175,11 @@ void readPots(void) {
         turn = 3;
         break;
     case 3:
-        adc3 = readADC(4);
+        if (timeState == 2) {
+            adc3 = readFilteredADC(4);
+            PR2 = (adc3 / 4096.0) * 65530;
+        }
         turn = 0;
-        LATEbits.LATE3 = adc3 > 2000;
         break;
     }
 

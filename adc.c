@@ -141,7 +141,7 @@ void adcInit() {
     TRISBbits.TRISB2 = 1;
     ANSELBbits.ANSB2 = 1;
 
-    //
+    // Works
     CM1CONbits.ON = 0;
     RPD4R = 0;
     TRISBbits.TRISB4 = 1;

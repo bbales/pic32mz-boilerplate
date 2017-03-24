@@ -9,6 +9,7 @@ This repository contains the boilerplate code for a DSP platform I am developing
 - *adc.c* Basic on-board ADC routines with software filtering leveraged
 - *timers.c* Timer configuration for peripherals and other misc tasks
 - *uart.c* Basic UART routines, mainly for debugging
+- *controls.c* Interfacing for buttons, switches, pots, LEDs etc
 - *dsp.c* DSP structures and routines
 
 #### Building and Programming
