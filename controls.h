@@ -14,6 +14,8 @@ extern "C" {
 #define TAP_LIGHT_TRUE_W LATEbits.LATE7
 #define BYPASS_W LATBbits.LATB12
 
+#define TIME_KNOB_AVERAGE_LEN 60
+
 // Tap
 extern unsigned long long audioCycles;
 int trueTap;
@@ -30,6 +32,12 @@ void checkBypass();
 // Subdivision
 char subdiv;
 void checkSubdiv();
+
+// Time knob averaging
+int avgIndex;
+unsigned int avgBuffer[TIME_KNOB_AVERAGE_LEN];
+unsigned int avg;
+unsigned int total;
 
 // Potentiometer stuff
 void readPots(void);

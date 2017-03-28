@@ -49,7 +49,10 @@ void controlsInit() {
     // RG8 : Eigth note 2:1
     // RG9 : Quarter note 1:1
     TRISGCLR = 0b1111 << 6;
-    LATGSET = 0b0001 << 6;
+
+    // Time knob averaging
+    for (avgIndex = 0; avgIndex < TIME_KNOB_AVERAGE_LEN; avgIndex++) { avgBuffer[avgIndex] = 0; }
+    avgIndex = 0;
 }
 
 // Tap
@@ -95,7 +98,7 @@ void checkBypass() {
     // Bypass Routine
     if (BYPASS_SW_R) {
         if (!bypassCount && bypassBounce) {
-            LATBINV = 1 << 12;
+            LATBINV = BIT_12;
             bypassBounce = 0;
         }
         bypassCount = 50000;
@@ -156,7 +159,11 @@ void checkSubdiv() {
 
 // Potentiometer stuff
 char turn = 0;
-int adc3 = 0;
+unsigned int adc3 = 0;
+int avgIndex = 0;
+unsigned int avgBuffer[TIME_KNOB_AVERAGE_LEN];
+unsigned int avg = 0;
+unsigned int total = 0;
 
 // Timer1 handler
 void readPots(void) {
@@ -176,8 +183,13 @@ void readPots(void) {
         break;
     case 3:
         if (timeState == 2) {
-            adc3 = readFilteredADC(4);
-            PR2 = (adc3 / 4096.0) * 65530;
+            total = total - avgBuffer[avgIndex];
+            avgBuffer[avgIndex] = readFilteredADC(4) >> 2;
+            total = total + avgBuffer[avgIndex];
+            avgIndex++;
+            if (avgIndex >= TIME_KNOB_AVERAGE_LEN) avgIndex = 0;
+            avg = total / TIME_KNOB_AVERAGE_LEN;
+            PR2 = avg + 80;
         }
         turn = 0;
         break;
