@@ -9,18 +9,13 @@
 #include <float.h>
 
 #include "dsp.h"
+#include "waves.h"
 #include "audio.h"
 #include "controls.h"
 
-int32 mul32custom(int32 a, int32 b) {
-    int64 y = (int64) a * (int64) b;
-    return ((int32) y >> 31);
-}
-
-int32 DSPLeakyIntegratorFunc(int32 sample) {
-    leaky.prevOutput = leaky.alpha * (leaky.prevOutput) + (1.0 - leaky.alpha) * (sample);
-    return leaky.prevOutput;
-}
+//
+// Sync Delay implementation
+//
 
 #if DELAY_ENABLED == 1
 int32 DSPDelayFunc(int32 sample) {
@@ -30,6 +25,10 @@ int32 DSPDelayFunc(int32 sample) {
     return delay.temp;
 }
 #endif
+
+//
+// Async Delay implementation
+//
 
 #if TAPE_ENABLED == 1
 int32 DSPTapeDelayFunc(int32 sample) {
@@ -61,6 +60,19 @@ void DSPTapeDelayTimerFunc(void) {
 }
 #endif
 
+//
+// Leaky integrator implementation
+//
+
+int32 DSPLeakyIntegratorFunc(int32 sample) {
+    leaky.prevOutput = leaky.alpha * (leaky.prevOutput) + (1.0 - leaky.alpha) * (sample);
+    return leaky.prevOutput;
+}
+
+//
+// FIR implementation
+//
+
 int32 DSPfirFilterFunc(int32 sample) {
     fir.current = sample;
     fir.acc = 0;
@@ -75,15 +87,26 @@ int32 DSPfirFilterFunc(int32 sample) {
     return (int32)(fir.acc >> 31);
 }
 
+int32 DSPAmplitudeModulationFunc(int32 sample) {
+    mod.step += 0.0125 * 10;
+    if (mod.step >= 600.0) { mod.step = 0.0; }
+    return (int32)(sample * (1 - mod.depth + mod.depth * mod.wave[(int) mod.step]));
+}
+
+//
+// Initialization
+//
+
 void dspInit() {
-// Delay - Standard fixed rate buffer delay
+
 #if DELAY_ENABLED == 1
+    // Delay - Standard fixed rate buffer delay
     delay = (DSPDelay){
         .func = DSPDelayFunc, .step = 0, .length = 20000, .decay = 0.6, .temp = 0, .line = {0}};
 #endif
 
-// Tape Delay - variable rate buffer delay
 #if TAPE_ENABLED == 1
+    // Tape Delay - variable rate buffer delay
     tapeDelay = (DSPTapeDelay){.func = DSPTapeDelayFunc,
                                .step = 0,
                                .length = 48000,
@@ -109,4 +132,8 @@ void dspInit() {
                          .acc = 0,
                          .iterator = 0,
                          .current = 0};
+
+    // amplitude modulation
+    mod = (DSPAmplitudeModulation){
+        .step = 0.0, .wave = sinew, .depth = 0.4, .func = DSPAmplitudeModulationFunc};
 }

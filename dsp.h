@@ -15,11 +15,19 @@ extern "C" {
 #include <sys/attribs.h>
 #include <dsplib_def.h>
 
+
 #define TAPE_ENABLED 1
 #define DELAY_ENABLED 0
 
+//
+// Routine for initializing all DSP
+//
+
 void dspInit();
-int32 mul32custom(int32 a, int32 b);
+
+//
+// Synchronous buffered delay line
+//
 
 typedef struct DSPDelay{
     int32 (*func)(int32);
@@ -29,6 +37,15 @@ typedef struct DSPDelay{
     int32 line[48000];
     int32 temp;
 } DSPDelay;
+
+#if DELAY_ENABLED==1
+DSPDelay delay;
+int32 DSPDelayFunc(int32 sample);
+#endif
+
+//
+// Asynchronous buffered delay line
+//
 
 typedef struct DSPTapeDelay{
     int32 (*func)(int32);
@@ -40,6 +57,17 @@ typedef struct DSPTapeDelay{
     int32 temp;
 } DSPTapeDelay;
 
+#if TAPE_ENABLED==1
+int32 DSPTapeDelayFunc(int32 sample);
+void DSPTapeDelayTimerFunc(void);
+
+DSPTapeDelay tapeDelay;
+void __ISR_AT_VECTOR(_TIMER_2_VECTOR, IPL7SRS) DSPTapeDelayTimerFunc(void);
+#endif
+
+//
+// The simplest and least computationally expensive filtering
+//
 
 typedef struct DSPLeakyIntegrator{
     int32 (*func)(int32);
@@ -47,6 +75,12 @@ typedef struct DSPLeakyIntegrator{
     double alpha;
 } DSPLeakyIntegrator;
 int32 DSPLeakyIntegratorFunc(int32 sample);
+
+DSPLeakyIntegrator leaky;
+
+//
+// Finite Impulse Response Filter
+//
 
 typedef struct DSPfirFilter{
     int32 (*func)(int32);
@@ -62,22 +96,21 @@ typedef struct DSPfirFilter{
 } DSPfirFilter;
 int32 DSPfirFilterFunc(int32 sample);
 
-// Instances of DSP objects
-#if DELAY_ENABLED==1
-DSPDelay delay;
-int32 DSPDelayFunc(int32 sample);
-#endif
-
-#if TAPE_ENABLED==1
-int32 DSPTapeDelayFunc(int32 sample);
-void DSPTapeDelayTimerFunc(void);
-
-DSPTapeDelay tapeDelay;
-void __ISR_AT_VECTOR(_TIMER_2_VECTOR, IPL7SRS) DSPTapeDelayTimerFunc(void);
-#endif
-
-DSPLeakyIntegrator leaky;
 DSPfirFilter fir;
+
+//
+// Wavetable based amplitude modulation
+//
+
+typedef struct DSPAmplitudeModulation{
+    int32 (*func)(int32);
+    double * wave;
+    double step;
+    double depth;
+} DSPAmplitudeModulation;
+int32 DSPAmplitudeModulationFunc(int32 sample);
+DSPAmplitudeModulation mod;
+
 
 #ifdef	__cplusplus
 }

@@ -1,6 +1,7 @@
 #include <xc.h>
 // #include <stdio.h> // Required for UART stuff
 
+#include "init.h"
 #include "controls.h"
 #include "adc.h"
 #include "audio.h"
@@ -157,13 +158,14 @@ void checkSubdiv() {
     LATEbits.LATE3 = timeState == 0;
 }
 
-// Potentiometer stuff
-char turn = 0;
-unsigned int adc3 = 0;
+// Time knob averaging
 int avgIndex = 0;
 unsigned int avgBuffer[TIME_KNOB_AVERAGE_LEN];
 unsigned int avg = 0;
 unsigned int total = 0;
+
+// Potentiometer stuff
+char turn = 0;
 
 // Timer1 handler
 void readPots(void) {
