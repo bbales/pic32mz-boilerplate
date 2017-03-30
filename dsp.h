@@ -40,7 +40,6 @@ typedef struct DSPDelay{
 
 #if DELAY_ENABLED==1
 DSPDelay delay;
-int32 DSPDelayFunc(int32 sample);
 #endif
 
 //
@@ -58,10 +57,9 @@ typedef struct DSPTapeDelay{
 } DSPTapeDelay;
 
 #if TAPE_ENABLED==1
-int32 DSPTapeDelayFunc(int32 sample);
-void DSPTapeDelayTimerFunc(void);
 
 DSPTapeDelay tapeDelay;
+void DSPTapeDelayTimerFunc(void);
 void __ISR_AT_VECTOR(_TIMER_2_VECTOR, IPL7SRS) DSPTapeDelayTimerFunc(void);
 #endif
 
@@ -73,8 +71,8 @@ typedef struct DSPLeakyIntegrator{
     int32 (*func)(int32);
     int32 prevOutput;
     double alpha;
+    double alphaNot;
 } DSPLeakyIntegrator;
-int32 DSPLeakyIntegratorFunc(int32 sample);
 
 DSPLeakyIntegrator leaky;
 
@@ -82,7 +80,7 @@ DSPLeakyIntegrator leaky;
 // Finite Impulse Response Filter
 //
 
-typedef struct DSPfirFilter{
+typedef struct DSPFIRFilter{
     int32 (*func)(int32);
     int32 line[20];
     int32 coeffs[20];
@@ -93,10 +91,9 @@ typedef struct DSPfirFilter{
     int numCoeffs;
     int iterator;
     long ptr;
-} DSPfirFilter;
-int32 DSPfirFilterFunc(int32 sample);
+} DSPFIRFilter;
 
-DSPfirFilter fir;
+DSPFIRFilter fir;
 
 //
 // Wavetable based amplitude modulation
@@ -108,7 +105,7 @@ typedef struct DSPAmplitudeModulation{
     double step;
     double depth;
 } DSPAmplitudeModulation;
-int32 DSPAmplitudeModulationFunc(int32 sample);
+
 DSPAmplitudeModulation mod;
 
 

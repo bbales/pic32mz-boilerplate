@@ -34,7 +34,7 @@ char subdiv;
 void checkSubdiv();
 
 // Time knob averaging
-int avgIndex;
+unsigned short avgIndex;
 unsigned int avgBuffer[TIME_KNOB_AVERAGE_LEN];
 unsigned int avg;
 unsigned int total;

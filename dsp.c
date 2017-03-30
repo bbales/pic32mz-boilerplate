@@ -65,7 +65,7 @@ void DSPTapeDelayTimerFunc(void) {
 //
 
 int32 DSPLeakyIntegratorFunc(int32 sample) {
-    leaky.prevOutput = leaky.alpha * (leaky.prevOutput) + (1.0 - leaky.alpha) * (sample);
+    leaky.prevOutput = leaky.alpha * leaky.prevOutput + leaky.alphaNot * sample;
     return leaky.prevOutput;
 }
 
@@ -73,7 +73,7 @@ int32 DSPLeakyIntegratorFunc(int32 sample) {
 // FIR implementation
 //
 
-int32 DSPfirFilterFunc(int32 sample) {
+int32 DSPFIRFilterFunc(int32 sample) {
     fir.current = sample;
     fir.acc = 0;
     for (fir.iterator = 0; fir.iterator < fir.order; fir.iterator++) {
@@ -117,10 +117,11 @@ void dspInit() {
 #endif
 
     // Leaky integrator
-    leaky = (DSPLeakyIntegrator){.func = DSPLeakyIntegratorFunc, .alpha = 0.2, .prevOutput = 0};
+    leaky = (DSPLeakyIntegrator){
+        .func = DSPLeakyIntegratorFunc, .alpha = 0.2, .alphaNot = 0.8, .prevOutput = 0};
 
     // FIR filter
-    fir = (DSPfirFilter){.func = DSPfirFilterFunc,
+    fir = (DSPFIRFilter){.func = DSPFIRFilterFunc,
                          .order = 12,
                          .numCoeffs = 11,
                          .coeffs = {-20858415, -45336999, -48513960, 4602059, 134600231, 311017954,

@@ -159,7 +159,7 @@ void checkSubdiv() {
 }
 
 // Time knob averaging
-int avgIndex = 0;
+unsigned short avgIndex = 0;
 unsigned int avgBuffer[TIME_KNOB_AVERAGE_LEN];
 unsigned int avg = 0;
 unsigned int total = 0;
@@ -176,6 +176,7 @@ void readPots(void) {
         break;
     case 1:
         leaky.alpha = readFilteredADC(1) / 4096.0;
+        leaky.alphaNot = 1.0 - leaky.alpha;
         turn = 2;
         break;
     case 2:
@@ -185,12 +186,25 @@ void readPots(void) {
         break;
     case 3:
         if (timeState == 2) {
+            // Remove the last from the sum
             total = total - avgBuffer[avgIndex];
+
+            // Set newest at index
             avgBuffer[avgIndex] = readFilteredADC(4) >> 2;
+
+            // Add newest to average
             total = total + avgBuffer[avgIndex];
+
+            // Increment Index
             avgIndex++;
+
+            // Reset index on OOB
             if (avgIndex >= TIME_KNOB_AVERAGE_LEN) avgIndex = 0;
+
+            // Calculate average
             avg = total / TIME_KNOB_AVERAGE_LEN;
+
+            // Pad the average to prevent lock-up
             PR2 = avg + 80;
         }
         turn = 0;
