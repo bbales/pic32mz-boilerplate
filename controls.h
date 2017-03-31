@@ -4,15 +4,19 @@ extern "C" {
 
 #include <sys/attribs.h>
 
-#define TAP_SW_R PORTBbits.RB14
-#define BYPASS_SW_R PORTBbits.RB15
-#define SUBDIV_SW_R PORTBbits.RB13
-#define TIME_SW_R1 PORTBbits.RB11
-#define TIME_SW_R0 PORTBbits.RB10
+/* These are configured as pull-down, hence the (!) */
+#define TAP_SW_R !PORTEbits.RE7
+#define BYPASS_SW_R !PORTEbits.RE6
+#define SUBDIV_SW_R !PORTCbits.RC12
+// #define TIME_SW_R1 PORTBbits.RB11
+// #define TIME_SW_R0 PORTBbits.RB10
 
-#define TAP_LIGHT_W LATEbits.LATE6
-#define TAP_LIGHT_TRUE_W LATEbits.LATE7
-#define BYPASS_W LATBbits.LATB12
+#define TAP_LIGHT_TRUE_W LATCbits.LATC15
+#define BYPASS_W LATEbits.LATE5
+#define SUB_1_W LATBbits.LATB12
+#define SUB_2_W LATBbits.LATB13
+#define SUB_3_W LATBbits.LATB14
+#define SUB_4_W LATBbits.LATB15
 
 #define TIME_KNOB_AVERAGE_LEN 60
 

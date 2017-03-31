@@ -18,7 +18,7 @@ int main(void) {
     dspInit();
     codecInit();
     uartInit();
-    adcInit();
+    // adcInit();
     t1Init();
     t2Init();
     controlsInit();

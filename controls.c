@@ -9,47 +9,49 @@
 
 void controlsInit() {
     // Tap LEDs
-    TRISEbits.TRISE6 = 0;
-    TRISEbits.TRISE7 = 0;
-
-    // Bypass LED
-    TRISBbits.TRISB12 = 0;
-
-    // Subdiv switch
-    TRISBbits.TRISB13 = 1;
-    CNPDBbits.CNPDB13 = 1;
-    ANSELBbits.ANSB13 = 0;
-    ETHCON1bits.ON = 0;
+    TRISCbits.TRISC15 = 0;
 
     // Tap switch
-    TRISBbits.TRISB14 = 1;
-    CNPDBbits.CNPDB14 = 1;
-    ANSELBbits.ANSB14 = 0;
+    TRISEbits.TRISE7 = 1;
+    CNPUEbits.CNPUE7 = 1;
+    ANSELEbits.ANSE7 = 0;
 
     // Bypass Switch
-    TRISBbits.TRISB15 = 1;
-    CNPDBbits.CNPDB15 = 1;
-    ANSELBbits.ANSB15 = 0;
+    TRISEbits.TRISE6 = 1;
+    CNPUEbits.CNPUE6 = 1;
+    ANSELEbits.ANSE6 = 0;
+    PMCON = 0;
+    ETHCON1bits.ON = 0;
 
-    // Time Select Switch
-    TRISBbits.TRISB11 = 1;
-    CNPDBbits.CNPDB11 = 1;
-    ANSELBbits.ANSB11 = 0;
+    // Bypass Control
+    TRISEbits.TRISE5 = 0;
+    ANSELEbits.ANSE5 = 0;
+    RPE5R = 0;
 
-    TRISBbits.TRISB10 = 1;
-    CNPDBbits.CNPDB10 = 1;
-    ANSELBbits.ANSB10 = 0;
-
-    // More LEDs
-    TRISECLR = 0b111 << 1;
-    LATESET = 0b111 << 1;
+    // Subdiv switch
+    TRISCbits.TRISC12 = 1;
+    CNPUCbits.CNPUC12 = 1;
 
     // Subdiv LEDs
-    // RG6 : Thirty-second note 8:1
-    // RG7 : Sixteenth note 4:1
-    // RG8 : Eigth note 2:1
-    // RG9 : Quarter note 1:1
-    TRISGCLR = 0b1111 << 6;
+    /*
+       RB12 : Thirty-second note 8:1
+       RB13 : Sixteenth note 4:1
+       RB14 : Eigth note 2:1
+       RB15 : Quarter note 1:1
+    */
+    TRISBCLR = 0b1111 << 12;
+
+    // Time Select Switch
+    // TRISBbits.TRISB11 = 1;
+    // CNPUBbits.CNPUB11 = 1;
+    // ANSELBbits.ANSB11 = 0;
+    // TRISBbits.TRISB10 = 1;
+    // CNPUBbits.CNPUB10 = 1;
+    // ANSELBbits.ANSB10 = 0;
+
+    // Time LEDs
+    // TRISECLR = 0b111 << 1;
+    // LATESET = 0b111 << 1;
 
     // Time knob averaging
     for (avgIndex = 0; avgIndex < TIME_KNOB_AVERAGE_LEN; avgIndex++) { avgBuffer[avgIndex] = 0; }
@@ -69,8 +71,10 @@ void checkTap() {
     if (TAP_SW_R && tapBounce) {
         tapBounce = 0;
         if (audioCycles > 20000) {
+            // Calculate non-subdivided period and clear cycles
             pr2 = 0.00512 * audioCycles;
             audioCycles = 0;
+
             //
             // Formula is ((PBCLK/CLKDIV)/ (tdlen * fcodec)) * lastTap
             // PBCLK = 945000000
@@ -79,16 +83,30 @@ void checkTap() {
             // tdlen = 48000
             // At clkdiv = 1 => 0.0205 * lastTap
             //
+
+            // Set timer 2 period to reflect tap
             PR2 = pr2 / subdiv;
-            LATESET = 3 << 6;
+
+            // Turn both tap LEDs
+            TAP_LIGHT_TRUE_W = 1;
+            SUB_1_W = 1;
+            SUB_2_W = 1;
+            SUB_3_W = 1;
+            SUB_4_W = 1;
+
+            // Clear tapFlip flag
             tapFlip = 0;
         }
     } else {
         tapBounce = 1;
     }
 
-    LATEbits.LATE6 = trueTap >= 0;
-    LATEbits.LATE7 = subTap >= 0;
+    // Control Tap LEDs
+    TAP_LIGHT_TRUE_W = trueTap >= 0;
+    SUB_1_W = subdiv == 1 && subTap >= 0;
+    SUB_2_W = subdiv == 2 && subTap >= 0;
+    SUB_3_W = subdiv == 4 && subTap >= 0;
+    SUB_4_W = subdiv == 8 && subTap >= 0;
 }
 
 // Bypass
@@ -99,7 +117,7 @@ void checkBypass() {
     // Bypass Routine
     if (BYPASS_SW_R) {
         if (!bypassCount && bypassBounce) {
-            LATBINV = BIT_12;
+            LATEINV = BIT_5;
             bypassBounce = 0;
         }
         bypassCount = 50000;
@@ -122,25 +140,10 @@ void checkSubdiv() {
         // Minimum countdown has elapsed
         // + button has returned to rest before being pressed again
         if (!subdivCount && subdivBounce) {
-            // Clear all subdiv LEDs
-            LATGCLR = 0b1111 << 6;
-            switch (subdiv) {
-            case 1:
-                subdiv = 2;
-                LATGbits.LATG7 = 1;
-                break;
-            case 2:
-                subdiv = 4;
-                LATGbits.LATG8 = 1;
-                break;
-            case 4:
-                subdiv = 8;
-                LATGbits.LATG9 = 1;
-                break;
-            case 8:
+            if (subdiv == 8) {
                 subdiv = 1;
-                LATGbits.LATG6 = 1;
-                break;
+            } else {
+                subdiv *= 2;
             }
             PR2 = pr2 / subdiv;
             subdivBounce = 0;
@@ -152,10 +155,10 @@ void checkSubdiv() {
     }
 
     // Time Switch LEDs
-    timeState = TIME_SW_R1 + 2 * TIME_SW_R0;
-    LATEbits.LATE1 = timeState == 2;
-    LATEbits.LATE2 = timeState == 1;
-    LATEbits.LATE3 = timeState == 0;
+    // timeState = TIME_SW_R1 + 2 * TIME_SW_R0;
+    // LATEbits.LATE1 = timeState == 2;
+    // LATEbits.LATE2 = timeState == 1;
+    // LATEbits.LATE3 = timeState == 0;
 }
 
 // Time knob averaging
@@ -171,42 +174,45 @@ char turn = 0;
 void readPots(void) {
     switch (turn) {
     case 0:
-        tapeDelay.decay = readFilteredADC(0) / 4096.0;
+        // tapeDelay.decay = readFilteredADC(0) / 4096.0;
+        tapeDelay.decay = 2000.0 / 4096.0;
         turn = 1;
         break;
     case 1:
-        leaky.alpha = readFilteredADC(1) / 4096.0;
+        // leaky.alpha = readFilteredADC(1) / 4096.0;
+        leaky.alpha = 0.5;
         leaky.alphaNot = 1.0 - leaky.alpha;
         turn = 2;
         break;
     case 2:
-        codec.dry = readFilteredADC(2) / 4096.0;
+        // codec.dry = readFilteredADC(2) / 4096.0;
+        codec.dry = 2000.0 / 4096.0;
         codec.wet = 1.0 - codec.dry;
         turn = 3;
         break;
     case 3:
-        if (timeState == 2) {
-            // Remove the last from the sum
-            total = total - avgBuffer[avgIndex];
-
-            // Set newest at index
-            avgBuffer[avgIndex] = readFilteredADC(4) >> 2;
-
-            // Add newest to average
-            total = total + avgBuffer[avgIndex];
-
-            // Increment Index
-            avgIndex++;
-
-            // Reset index on OOB
-            if (avgIndex >= TIME_KNOB_AVERAGE_LEN) avgIndex = 0;
-
-            // Calculate average
-            avg = total / TIME_KNOB_AVERAGE_LEN;
-
-            // Pad the average to prevent lock-up
-            PR2 = avg + 80;
-        }
+        // if (timeState == 2) {
+        //     // Remove the last from the sum
+        //     total = total - avgBuffer[avgIndex];
+        //
+        //     // Set newest at index
+        //     avgBuffer[avgIndex] = readFilteredADC(4) >> 2;
+        //
+        //     // Add newest to average
+        //     total = total + avgBuffer[avgIndex];
+        //
+        //     // Increment Index
+        //     avgIndex++;
+        //
+        //     // Reset index on OOB
+        //     if (avgIndex >= TIME_KNOB_AVERAGE_LEN) avgIndex = 0;
+        //
+        //     // Calculate average
+        //     avg = total / TIME_KNOB_AVERAGE_LEN;
+        //
+        //     // Pad the average to prevent lock-up
+        //     PR2 = avg + 80;
+        // }
         turn = 0;
         break;
     }
