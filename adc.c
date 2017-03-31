@@ -48,25 +48,34 @@ void adcInit() {
     ADCCON1bits.STRGSRC = 1; // Scan Trig Source Select (Global Software Trigger (GSWTRG))
 
     // ADCCON2
-    ADCCON2bits.SAMC = 68;  // ADC7 Sample Time (70 * Tad7)
+    // ADCCON2bits.SAMC = 68;  // ADC7 Sample Time (70 * Tad7)
+    ADCCON2bits.SAMC = 1;   // ADC7 Sample Time (70 * Tad7)
     ADCCON2bits.ADCDIV = 1; // ADC7 Clock Divider (Divide by 2)
 
     // ADCCON3
-    ADCCON3bits.ADCSEL = 0;    // ADC Clock Source SYSCLK
+    ADCCON3bits.ADCSEL = 0;    // ADC Clock Source (0 : Tclk, 1: SYSCLK)
     ADCCON3bits.CONCLKDIV = 1; // ADC Control Clock <Tq> Divider (Divide by 20)
     ADCCON3bits.VREFSEL = 0;   // Voltage Reference Input Selection (AVdd, AVss)
 
     // Select ADC sample time and conversion clock, 10 bit res, sampling time of
     // 5 * TADx
     ADC0TIMEbits.ADCDIV = 1;
-    ADC0TIMEbits.SAMC = 5;
-    ADC0TIMEbits.SELRES = 2;
     ADC1TIMEbits.ADCDIV = 1;
-    ADC1TIMEbits.SAMC = 5;
-    ADC1TIMEbits.SELRES = 2;
     ADC2TIMEbits.ADCDIV = 1;
-    ADC2TIMEbits.SAMC = 5;
+    ADC3TIMEbits.ADCDIV = 1;
+    ADC4TIMEbits.ADCDIV = 1;
+
+    ADC0TIMEbits.SAMC = 1;
+    ADC1TIMEbits.SAMC = 1;
+    ADC2TIMEbits.SAMC = 1;
+    ADC3TIMEbits.SAMC = 1;
+    ADC4TIMEbits.SAMC = 1;
+
+    ADC0TIMEbits.SELRES = 2;
+    ADC1TIMEbits.SELRES = 2;
     ADC2TIMEbits.SELRES = 2;
+    ADC3TIMEbits.SELRES = 2;
+    ADC4TIMEbits.SELRES = 2;
 
     // Enable filter 1
     ADCFLTR1bits.DFMODE = 1; // Averaging mode
@@ -94,6 +103,13 @@ void adcInit() {
     ADCTRG1bits.TRGSRC2 = 1;
     ADCTRG1bits.TRGSRC3 = 1;
     ADCTRG2bits.TRGSRC4 = 1;
+    ADCTRG2bits.TRGSRC5 = 1;
+    ADCTRG2bits.TRGSRC6 = 1;
+    ADCTRG2bits.TRGSRC7 = 1;
+    ADCTRG3bits.TRGSRC8 = 1;
+    ADCTRG3bits.TRGSRC9 = 1;
+    ADCTRG3bits.TRGSRC10 = 1;
+    ADCTRG3bits.TRGSRC11 = 1;
 
     // Turn on ADC module
     ADCCON1bits.ON = 1;
@@ -108,6 +124,7 @@ void adcInit() {
     ADCANCONbits.ANEN2 = 1;
     ADCANCONbits.ANEN3 = 1;
     ADCANCONbits.ANEN4 = 1;
+    ADCANCONbits.ANEN7 = 1;
 
     // Wait for ADC ready
     while (!ADCANCONbits.WKRDY0) continue;
@@ -119,6 +136,7 @@ void adcInit() {
     ADCCON3bits.DIGEN2 = 1;
     ADCCON3bits.DIGEN3 = 1;
     ADCCON3bits.DIGEN4 = 1;
+    ADCCON3bits.DIGEN7 = 1;
 
     // Pin designations
     TRISBbits.TRISB4 = 1;
@@ -146,9 +164,15 @@ void adcInit() {
     RPD4R = 0;
     TRISBbits.TRISB4 = 1;
     ANSELBbits.ANSB4 = 1;
+
+    TRISBbits.TRISB3 = 1;
+    ANSELBbits.ANSB3 = 1;
 }
 
-int getDataADC(int achannel) {
+int readADC(unsigned int achannel) {
+    ADCCON3bits.GSWTRG = 1;
+    while (((ADCDSTAT1 >> achannel) | 1) == 0) continue;
+
     switch (achannel) {
     case 0:
         return ADCDATA0;
@@ -162,16 +186,38 @@ int getDataADC(int achannel) {
         return ADCDATA4;
     case 5:
         return ADCDATA5;
+    case 14:
+        return ADCDATA14;
+    case 18:
+        return ADCDATA18;
     }
 }
 
-int readADC(int achannel) {
-    ADCCON3bits.GSWTRG = 1;
+int readADCAlt(unsigned int achannel) {
+    ADCCON3bits.ADINSEL = achannel; // Channel to manually trigger
+    ADCCON3bits.RQCNVRT = 1;        // Manually trigger selected channel
     while (((ADCDSTAT1 >> achannel) | 1) == 0) continue;
-    return getDataADC(achannel);
+    switch (achannel) {
+    case 0:
+        return ADCDATA0;
+    case 1:
+        return ADCDATA1;
+    case 2:
+        return ADCDATA2;
+    case 3:
+        return ADCDATA3;
+    case 4:
+        return ADCDATA4;
+    case 5:
+        return ADCDATA5;
+    case 14:
+        return ADCDATA14;
+    case 18:
+        return ADCDATA18;
+    }
 }
 
-int readFilteredADC(int achannel) {
+int readFilteredADC(unsigned int achannel) {
     ADCFLTR1bits.CHNLID = achannel;           // Select channel 1
     ADCFLTR1bits.AFEN = 1;                    // Enable the filter
     ADCCON3bits.ADINSEL = achannel;           // Channel to manually trigger

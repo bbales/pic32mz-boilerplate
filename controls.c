@@ -53,6 +53,13 @@ void controlsInit() {
     // TRISECLR = 0b111 << 1;
     // LATESET = 0b111 << 1;
 
+    // Pots
+
+    TRISGbits.TRISG6 = 1;
+    ANSELGbits.ANSG6 = 1;
+    RPG6R = 0;
+    SPI2CON = 0;
+
     // Time knob averaging
     for (avgIndex = 0; avgIndex < TIME_KNOB_AVERAGE_LEN; avgIndex++) { avgBuffer[avgIndex] = 0; }
     avgIndex = 0;
