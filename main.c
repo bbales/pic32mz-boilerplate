@@ -10,8 +10,6 @@
 #include "uart.h"
 #include "adc.h"
 
-char s[8];
-
 int main(void) {
     // Enable multi-vectored mode
     INTCONbits.MVEC = 1;
@@ -19,7 +17,7 @@ int main(void) {
     // Initializations
     dspInit();
     codecInit();
-    uartInit();
+    // uartInit();
     adcInit();
     t1Init();
     t2Init();
@@ -29,10 +27,6 @@ int main(void) {
         checkBypass();
         checkSubdiv();
         checkTap();
-
-        uartClearScreen();
-        sprintf(s, "%d", readADCAlt(14));
-        uartSendString(s);
     }
 
     // Impossible!

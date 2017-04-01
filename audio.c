@@ -12,10 +12,15 @@
 #include "controls.h"
 
 void codecRW() {
+    asm volatile("di");
     if (codec.channel == CHANNEL_B) {
         // Processing
-        codec.leftOut = codec.dry * codec.leftIn +
-                        codec.wet * leaky.func(tapeDelay.func(mod.func(codec.leftIn)));
+        // codec.leftOut = codec.dry * codec.leftIn +
+        //                 codec.wet * leaky.func(tapeDelay.func(mod.func(codec.leftIn)));
+        // codec.leftOut = tapeDelay.func(l2.func(l2, l1.func(l1, codec.leftIn)));
+        // codec.leftOut = codec.leftIn;
+        codec.leftOut = tapeDelay.func(codec.leftIn);
+        // codec.leftOut = l2.func(l2, l1.func(l1, codec.leftIn));
 
         // Read SPI4BUF
         codec.leftIn = SPI4BUF;
@@ -24,7 +29,7 @@ void codecRW() {
         SPI4BUF = codec.leftOut;
 
         // Switch channels
-        codec.channel = 0;
+        codec.channel = CHANNEL_A;
     } else {
         // Processing
         codec.rightOut = 0;
@@ -36,12 +41,13 @@ void codecRW() {
         SPI4BUF = codec.rightOut;
 
         // Switch channels
-        codec.channel = 1;
+        codec.channel = CHANNEL_B;
     }
 
     audioCycles++;
 
     // Clear interrupt flag
+    asm volatile("ei");
     IFS5bits.SPI4RXIF = 0;
 }
 
@@ -142,8 +148,8 @@ void codecInit() {
 
     // Ignore overflow and dont generate error events
     SPI4CON2bits.IGNROV = 1;   // Ignore recieve overflow
-    SPI4CON2bits.SPIROVEN = 0; // Enable overglow error interruptsN2bits.IGNTUR = 1;
-                               // Ignore transmit underrun bit
+    SPI4CON2bits.IGNTUR = 1;   // Ignore transmit underrun bit
+    SPI4CON2bits.SPIROVEN = 0; // Enable overglow error interrupts
     SPI4CON2bits.SPITUREN = 0; // Enable transmit underrun error interrupts
     SPI4CON2bits.FRMERREN = 0; // Enable frame error interrupts
     SPI4STATbits.SPIROV = 0;   // Reset overflow stat
@@ -162,7 +168,7 @@ void codecInit() {
 
     // IPC - Interrupt priority and shadow register
     IPC41bits.SPI4RXIP = 7; // This line causes trouble for some reason
-    IPC41bits.SPI4RXIS = 2;
+    IPC41bits.SPI4RXIS = 3;
 
     // IEC - Interrupt enable
     IEC5bits.SPI4EIE = 0;

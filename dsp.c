@@ -37,6 +37,7 @@ int32 DSPTapeDelayFunc(int32 sample) {
 }
 
 void DSPTapeDelayTimerFunc(void) {
+    asm volatile("di");
     trueTap--;
     subTap--;
     tapeDelay.line[tapeDelay.step] =
@@ -56,6 +57,7 @@ void DSPTapeDelayTimerFunc(void) {
     }
 
     // Clear interrupt
+    asm volatile("ei");
     IFS0bits.T2IF = 0;
 }
 #endif
@@ -64,9 +66,9 @@ void DSPTapeDelayTimerFunc(void) {
 // Leaky integrator implementation
 //
 
-int32 DSPLeakyIntegratorFunc(int32 sample) {
-    leaky.prevOutput = leaky.alpha * leaky.prevOutput + leaky.alphaNot * sample;
-    return leaky.prevOutput;
+int32 DSPLeakyIntegratorFunc(struct DSPLeakyIntegrator l, int32 sample) {
+    l.prevOutput = l.alpha * l.prevOutput + l.alphaNot * sample;
+    return l.prevOutput;
 }
 
 //
@@ -117,7 +119,9 @@ void dspInit() {
 #endif
 
     // Leaky integrator
-    leaky = (DSPLeakyIntegrator){
+    l1 = (DSPLeakyIntegrator){
+        .func = DSPLeakyIntegratorFunc, .alpha = 0.2, .alphaNot = 0.8, .prevOutput = 0};
+    l2 = (DSPLeakyIntegrator){
         .func = DSPLeakyIntegratorFunc, .alpha = 0.2, .alphaNot = 0.8, .prevOutput = 0};
 
     // FIR filter

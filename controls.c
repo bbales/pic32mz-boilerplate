@@ -8,7 +8,7 @@
 #include "dsp.h"
 
 void controlsInit() {
-    // Tap LEDs
+    // Tap LED
     TRISCbits.TRISC15 = 0;
 
     // Tap switch
@@ -23,7 +23,7 @@ void controlsInit() {
     PMCON = 0;
     ETHCON1bits.ON = 0;
 
-    // Bypass Control
+    // Bypass Relay Enable
     TRISEbits.TRISE5 = 0;
     ANSELEbits.ANSE5 = 0;
     RPE5R = 0;
@@ -31,6 +31,12 @@ void controlsInit() {
     // Subdiv switch
     TRISCbits.TRISC12 = 1;
     CNPUCbits.CNPUC12 = 1;
+
+    // Toggle Switches
+    TRISESET = 0b1111 << 1;
+    CNPUESET = 0b1111 << 1;
+    SQI1CON = 0;
+    ANSELEbits.ANSE4 = 0;
 
     // Subdiv LEDs
     /*
@@ -41,24 +47,18 @@ void controlsInit() {
     */
     TRISBCLR = 0b1111 << 12;
 
-    // Time Select Switch
-    // TRISBbits.TRISB11 = 1;
-    // CNPUBbits.CNPUB11 = 1;
-    // ANSELBbits.ANSB11 = 0;
-    // TRISBbits.TRISB10 = 1;
-    // CNPUBbits.CNPUB10 = 1;
-    // ANSELBbits.ANSB10 = 0;
-
     // Time LEDs
     // TRISECLR = 0b111 << 1;
     // LATESET = 0b111 << 1;
 
     // Pots
+    TRISBSET = 0b11111;
+    ANSELBSET = 0b11111;
 
-    TRISGbits.TRISG6 = 1;
-    ANSELGbits.ANSG6 = 1;
-    RPG6R = 0;
-    SPI2CON = 0;
+    CM2CONbits.ON = 0;
+    RPD2R = 0;
+    CM1CONbits.ON = 0;
+    RPD4R = 0;
 
     // Time knob averaging
     for (avgIndex = 0; avgIndex < TIME_KNOB_AVERAGE_LEN; avgIndex++) { avgBuffer[avgIndex] = 0; }
@@ -181,19 +181,18 @@ char turn = 0;
 void readPots(void) {
     switch (turn) {
     case 0:
-        // tapeDelay.decay = readFilteredADC(0) / 4096.0;
-        tapeDelay.decay = 2000.0 / 4096.0;
+        tapeDelay.decay = readFilteredADC(0) / 4096.0;
         turn = 1;
         break;
     case 1:
-        // leaky.alpha = readFilteredADC(1) / 4096.0;
-        leaky.alpha = 0.5;
-        leaky.alphaNot = 1.0 - leaky.alpha;
+        l1.alpha = readFilteredADC(1) / 4096.0;
+        l1.alphaNot = 1.0 - l1.alpha;
+        l2.alpha = l1.alpha;
+        l2.alphaNot = l2.alphaNot;
         turn = 2;
         break;
     case 2:
-        // codec.dry = readFilteredADC(2) / 4096.0;
-        codec.dry = 2000.0 / 4096.0;
+        codec.dry = readFilteredADC(2) / 4096.0;
         codec.wet = 1.0 - codec.dry;
         turn = 3;
         break;

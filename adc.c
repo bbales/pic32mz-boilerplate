@@ -137,84 +137,19 @@ void adcInit() {
     ADCCON3bits.DIGEN3 = 1;
     ADCCON3bits.DIGEN4 = 1;
     ADCCON3bits.DIGEN7 = 1;
-
-    // Pin designations
-    TRISBbits.TRISB4 = 1;
-    ANSELBbits.ANSB4 = 1;
-
-    TRISBbits.TRISB10 = 1;
-    ANSELBbits.ANSB10 = 1;
-
-    // Works
-    TRISBbits.TRISB0 = 1;
-    ANSELBbits.ANSB0 = 1;
-
-    // Works
-    TRISBbits.TRISB1 = 1;
-    ANSELBbits.ANSB1 = 1;
-
-    // Works
-    CM2CONbits.ON = 0;
-    RPD2R = 0;
-    TRISBbits.TRISB2 = 1;
-    ANSELBbits.ANSB2 = 1;
-
-    // Works
-    CM1CONbits.ON = 0;
-    RPD4R = 0;
-    TRISBbits.TRISB4 = 1;
-    ANSELBbits.ANSB4 = 1;
-
-    TRISBbits.TRISB3 = 1;
-    ANSELBbits.ANSB3 = 1;
 }
 
 int readADC(unsigned int achannel) {
     ADCCON3bits.GSWTRG = 1;
     while (((ADCDSTAT1 >> achannel) | 1) == 0) continue;
-
-    switch (achannel) {
-    case 0:
-        return ADCDATA0;
-    case 1:
-        return ADCDATA1;
-    case 2:
-        return ADCDATA2;
-    case 3:
-        return ADCDATA3;
-    case 4:
-        return ADCDATA4;
-    case 5:
-        return ADCDATA5;
-    case 14:
-        return ADCDATA14;
-    case 18:
-        return ADCDATA18;
-    }
+    return *(&ADCDATA0 + achannel);
 }
 
 int readADCAlt(unsigned int achannel) {
     ADCCON3bits.ADINSEL = achannel; // Channel to manually trigger
     ADCCON3bits.RQCNVRT = 1;        // Manually trigger selected channel
     while (((ADCDSTAT1 >> achannel) | 1) == 0) continue;
-    switch (achannel) {
-    case 0:
-        return ADCDATA0;
-    case 1:
-        return ADCDATA1;
-    case 2:
-        return ADCDATA2;
-    case 3:
-        return ADCDATA3;
-    case 4:
-        return ADCDATA4;
-    case 5:
-        return ADCDATA5;
-    case 14:
-        return ADCDATA14;
-    case 18:
-        return ADCDATA18;
-    }
+    return *(&ADCDATA0 + achannel);
 }
 
 int readFilteredADC(unsigned int achannel) {

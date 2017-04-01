@@ -36,7 +36,7 @@
 #pragma config DEBUG = OFF  // Background Debugger Enable (Debugger is disabled)
 #pragma config JTAGEN = OFF // JTAG Enable (JTAG Port Enabled)
 #pragma config ICESEL = ICS_PGx2 // ICE/ICD Comm Channel Select (Communicate on PGEC2/PGED2)
-#pragma config TRCEN = ON // Trace Enable (Trace features in the CPU are enabled)
+#pragma config TRCEN = OFF // Trace Enable (Trace features in the CPU are enabled)
 #pragma config BOOTISA = MIPS32 // Boot ISA Selection (Boot code and Exception code is MIPS32)
 #pragma config FECCCON = OFF_UNLOCKED
 #pragma config FSLEEP = OFF

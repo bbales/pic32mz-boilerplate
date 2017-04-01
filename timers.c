@@ -18,12 +18,12 @@ void t1Init() {
     T1CONbits.TCKPS = 3; // Input clock prescale select (1:1)
     T1CONbits.TCS = 0;   // Source is internal periph bus clock
 
-    // PR1 = 20000; // Timer 1 period
     PR1 = 13000; // Timer 1 period
-    TMR1 = 0;    // Clear timer 1 counter
+    // PR1 = 13000; // Timer 1 period
+    TMR1 = 0; // Clear timer 1 counter
 
     IPC1bits.T1IP = 6; // Interrupt priority 6
-    IPC1bits.T1IS = 1; // Sub-priority 3
+    IPC1bits.T1IS = 3; // Sub-priority 3
     IFS0bits.T1IF = 0; // Clear interrupt flag
     IEC0bits.T1IE = 1; // Interrupt enable
 
@@ -48,7 +48,7 @@ void t2Init() {
     TMR2 = 0;  // Clear timer 2 counter
 
     IPC2bits.T2IP = 7; // Interrupt priority
-    IPC2bits.T2IS = 3; // Sub-priority 2
+    IPC2bits.T2IS = 1; // Sub-priority 2
     IFS0bits.T2IF = 0; // Clear interrupt flag
     IEC0bits.T2IE = 1; // Enable timer 2 interrupt
 

@@ -68,13 +68,14 @@ void __ISR_AT_VECTOR(_TIMER_2_VECTOR, IPL7SRS) DSPTapeDelayTimerFunc(void);
 //
 
 typedef struct DSPLeakyIntegrator{
-    int32 (*func)(int32);
+    int32 (*func)(struct DSPLeakyIntegrator, int32);
     int32 prevOutput;
     double alpha;
     double alphaNot;
 } DSPLeakyIntegrator;
 
-DSPLeakyIntegrator leaky;
+DSPLeakyIntegrator l1;
+DSPLeakyIntegrator l2;
 
 //
 // Finite Impulse Response Filter
