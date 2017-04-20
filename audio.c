@@ -17,10 +17,13 @@ void codecRW() {
         // Processing
         // codec.leftOut = codec.dry * codec.leftIn +
         //                 codec.wet * leaky.func(tapeDelay.func(mod.func(codec.leftIn)));
-        // codec.leftOut = tapeDelay.func(l2.func(l2, l1.func(l1, codec.leftIn)));
-        // codec.leftOut = codec.leftIn;
-        codec.leftOut = tapeDelay.func(codec.leftIn);
-        // codec.leftOut = l2.func(l2, l1.func(l1, codec.leftIn));
+        if (SW1 == 0) {
+            codec.leftOut = tapeDelay.func(l2.func(l2, l1.func(l1, codec.leftIn)));
+        } else if (SW1 == 1) {
+            codec.leftOut = 2 * tapeDelay.func(l2.func(l2, l1.func(l1, codec.leftIn)));
+        } else {
+            codec.leftOut = 4 * tapeDelay.func(l2.func(l2, l1.func(l1, codec.leftIn)));
+        }
 
         // Read SPI4BUF
         codec.leftIn = SPI4BUF;
