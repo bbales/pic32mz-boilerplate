@@ -23,11 +23,7 @@ int main(void) {
     t2Init();
     controlsInit();
 
-    while (1) {
-        checkBypass();
-        checkSubdiv();
-        checkTap();
-    }
+    while (1) { readControls(); }
 
     // Impossible!
     return 0;

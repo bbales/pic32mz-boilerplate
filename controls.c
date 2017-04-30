@@ -7,6 +7,10 @@
 #include "audio.h"
 #include "dsp.h"
 
+Debouncer tapDebounce;
+Debouncer bypassDebounce;
+Debouncer subdivDebounce;
+
 void controlsInit() {
     // True Tap LED
     TRISCbits.TRISC15 = 0;
@@ -52,10 +56,6 @@ void controlsInit() {
     */
     TRISBCLR = 0b1111 << 12;
 
-    // Time LEDs
-    // TRISECLR = 0b111 << 1;
-    // LATESET = 0b111 << 1;
-
     // Pots
     TRISBSET = 0b11111;
     ANSELBSET = 0b11111;
@@ -65,79 +65,34 @@ void controlsInit() {
     CM1CONbits.ON = 0;
     RPD4R = 0;
 
-    // Time knob averaging
-    for (avgIndex = 0; avgIndex < TIME_KNOB_AVERAGE_LEN; avgIndex++) { avgBuffer[avgIndex] = 0; }
-    avgIndex = 0;
+    tapDebounce.func = checkTap;
+    tapDebounce.count = 0;
+    tapDebounce.hasBounced = 1;
+
+    bypassDebounce.func = checkBypass;
+    bypassDebounce.count = 0;
+    bypassDebounce.hasBounced = 1;
+
+    subdivDebounce.func = checkSubdiv;
+    subdivDebounce.count = 0;
+    subdivDebounce.hasBounced = 1;
 }
 
-// Tap
-unsigned long long audioCycles = 0;
-
-int trueTap = 0;
-int subTap = 0;
-char tapFlip = 0;
-
-// This is the period of timer 2, or the Tap period
-int TAP_PERIOD = 0;
-char TAP_HAS_BOUNCED = 1;
-unsigned int TAP_BOUNCE_COUNT = 0;
-
-char TAP_STATE = 0;
-unsigned long long TAP_SUM = 0;
-
-void checkTap() {
-    // Tap switch pressed and this is not a bounce
-    if (TAP_SW_R) {
-        if (!TAP_BOUNCE_COUNT && TAP_HAS_BOUNCED) {
-            // Audio cycles updates 96000 times a second
-
-            // If there was a pause greater than 2 seconds, restart
-            if (audioCycles > 96000 * 2) {
-                TAP_SUM = 0;
-                TAP_STATE = 0;
-            }
-
-            // For last 3 taps, add to sum
-            if (TAP_STATE > 0) { TAP_SUM += audioCycles; }
-
-            // Reset count
-            audioCycles = 0;
-
-            if (TAP_STATE == 3) {
-                // Calculate non-subdivided period and clear cycles
-                TAP_PERIOD = (0.00512 * TAP_SUM) / 3.0;
-
-                // Reset the sum and state
-                TAP_SUM = 0;
-                TAP_STATE = 0;
-
-                //
-                // Formula is ((PBCLK/CLKDIV)/ (tdlen * fcodec)) * lastTap
-                // PBCLK = 945000000
-                // CLKDIV = 1 -> 256
-                // fcodec = 96000
-                // tdlen = 48000
-                // At clkdiv = 1 => 0.0205 * lastTap
-                //
-
-                // Set timer 2 period to reflect tap
-                PR2 = TAP_PERIOD / subdiv;
-
-                // Clear tapFlip flag
-                tapFlip = 0;
-            } else {
-                // Increment the state
-                TAP_STATE++;
-            }
-
-            // Tap switch has not returned to rest
-            TAP_HAS_BOUNCED = 0;
+void debounce(Debouncer *d, char trigger) {
+    if (trigger) {
+        if (!d->count && d->hasBounced) {
+            d->func();
+            d->hasBounced = 0;
         }
-        TAP_BOUNCE_COUNT = 50000;
+        d->count = 50000;
     } else {
-        if (!TAP_HAS_BOUNCED) TAP_BOUNCE_COUNT--;
-        if (!TAP_BOUNCE_COUNT) TAP_HAS_BOUNCED = 1;
+        if (!d->hasBounced) d->count--;
+        if (!d->count) d->hasBounced = 1;
     }
+}
+
+void readControls() {
+    debounce(&tapDebounce, TAP_SW_R);
 
     // Control Tap LEDs
     TAP_LIGHT_TRUE_W = trueTap >= 0;
@@ -145,76 +100,92 @@ void checkTap() {
     SUB_2_W = subdiv == 2 && subTap >= 0;
     SUB_3_W = subdiv == 4 && subTap >= 0;
     SUB_4_W = subdiv == 8 && subTap >= 0;
+
+    debounce(&bypassDebounce, BYPASS_SW_R);
+    debounce(&subdivDebounce, SUBDIV_SW_R);
+}
+
+//
+// Tap
+//
+
+unsigned long long audioCycles = 0;
+int trueTap = 0;
+int subTap = 0;
+char tapFlip = 0;
+int TAP_PERIOD = 0;
+char TAP_STATE = 0;
+unsigned long long TAP_SUM = 0;
+
+void checkTap() {
+    // If there was a pause greater than 2 seconds, restart
+    if (audioCycles > 96000 * 2) {
+        TAP_SUM = 0;
+        TAP_STATE = 0;
+    }
+
+    // For last 3 taps, add to sum
+    if (TAP_STATE > 0) { TAP_SUM += audioCycles; }
+
+    // Reset count
+    audioCycles = 0;
+
+    if (TAP_STATE == 3) {
+        // Calculate non-subdivided period and clear cycles
+        TAP_PERIOD = (0.00512 * TAP_SUM) / 3.0;
+
+        // Reset the sum and state
+        TAP_SUM = 0;
+        TAP_STATE = 0;
+
+        //
+        // Formula is ((PBCLK/CLKDIV)/ (tdlen * fcodec)) * lastTap
+        // PBCLK = 945000000
+        // CLKDIV = 1 -> 256
+        // fcodec = 96000
+        // tdlen = 48000
+        // At clkdiv = 1 => 0.0205 * lastTap
+        //
+
+        // Set timer 2 period to reflect tap
+        PR2 = TAP_PERIOD / subdiv;
+
+        // Clear tapFlip flag
+        tapFlip = 0;
+    } else {
+        // Increment the state
+        TAP_STATE++;
+    }
 }
 
 //
 // Bypass
 //
 
-char BYPASS_HAS_BOUNCED = 1;
-unsigned int BYPASS_BOUNCE_COUNT = 0;
-
 void checkBypass() {
-    // Bypass Routine
-    if (BYPASS_SW_R) {
-        if (!BYPASS_BOUNCE_COUNT && BYPASS_HAS_BOUNCED) {
-            // Acutal button logic here
-            RELAY_FLIP;
-            BYPASS_FLIP;
-            BYPASS_HAS_BOUNCED = 0;
-        }
-        BYPASS_BOUNCE_COUNT = 50000;
-    } else {
-        if (!BYPASS_HAS_BOUNCED) BYPASS_BOUNCE_COUNT--;
-        if (!BYPASS_BOUNCE_COUNT) BYPASS_HAS_BOUNCED = 1;
-    }
+    RELAY_FLIP;
+    BYPASS_FLIP;
 }
 
 //
 // Subdivision
 //
 
-char SUBDIV_HAS_BOUNCED = 1;
-unsigned int SUBDIV_BOUNCE_COUNT = 0;
 char subdiv = 1;
 
-short timeState = 0;
-
 void checkSubdiv() {
-    // Subdiv switch has been pressed
-    if (SUBDIV_SW_R) {
-        // Minimum countdown has elapsed
-        // + button has returned to rest before being pressed again
-        if (!SUBDIV_BOUNCE_COUNT && SUBDIV_HAS_BOUNCED) {
-            // Actual button logic here
-            if (subdiv == 8) {
-                subdiv = 1;
-            } else {
-                subdiv *= 2;
-            }
-            PR2 = TAP_PERIOD / subdiv;
-            SUBDIV_HAS_BOUNCED = 0;
-        }
-        SUBDIV_BOUNCE_COUNT = 50000;
+    if (subdiv == 8) {
+        subdiv = 1;
     } else {
-        if (!SUBDIV_HAS_BOUNCED) SUBDIV_BOUNCE_COUNT--;
-        if (!SUBDIV_BOUNCE_COUNT) SUBDIV_HAS_BOUNCED = 1;
+        subdiv *= 2;
     }
-
-    // Time Switch LEDs
-    // timeState = TIME_SW_R1 + 2 * TIME_SW_R0;
-    // LATEbits.LATE1 = timeState == 2;
-    // LATEbits.LATE2 = timeState == 1;
-    // LATEbits.LATE3 = timeState == 0;
+    PR2 = TAP_PERIOD / subdiv;
 }
 
-// Time knob averaging
-unsigned short avgIndex = 0;
-unsigned int avgBuffer[TIME_KNOB_AVERAGE_LEN];
-unsigned int avg = 0;
-unsigned int total = 0;
-
+//
 // Potentiometer stuff
+//
+
 char turn = 0;
 
 // Timer1 handler
@@ -237,28 +208,6 @@ void readPots(void) {
         turn = 3;
         break;
     case 3:
-        // if (timeState == 2) {
-        //     // Remove the last from the sum
-        //     total = total - avgBuffer[avgIndex];
-        //
-        //     // Set newest at index
-        //     avgBuffer[avgIndex] = readFilteredADC(4) >> 2;
-        //
-        //     // Add newest to average
-        //     total = total + avgBuffer[avgIndex];
-        //
-        //     // Increment Index
-        //     avgIndex++;
-        //
-        //     // Reset index on OOB
-        //     if (avgIndex >= TIME_KNOB_AVERAGE_LEN) avgIndex = 0;
-        //
-        //     // Calculate average
-        //     avg = total / TIME_KNOB_AVERAGE_LEN;
-        //
-        //     // Pad the average to prevent lock-up
-        //     PR2 = avg + 80;
-        // }
         turn = 0;
         break;
     }

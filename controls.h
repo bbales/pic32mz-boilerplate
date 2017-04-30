@@ -22,30 +22,34 @@ extern "C" {
 #define SUB_3_W LATBbits.LATB14
 #define SUB_4_W LATBbits.LATB15
 
-#define TIME_KNOB_AVERAGE_LEN 60
+typedef struct Debouncer{
+    void (*func)(void);
+    char hasBounced;
+    unsigned int count;
+} Debouncer;
 
-// Tap
-extern unsigned long long audioCycles;
-int trueTap;
-int subTap;
-char tapFlip;
-void checkTap();
+void debounce(Debouncer * d, char trigger);
+
+// Debouncers
+Debouncer tapDebounce;
+Debouncer bypassDebounce;
+Debouncer subdivDebounce;
 
 // Initialize Controls
 void controlsInit();
 
-// Bypass
-void checkBypass();
+// Tap
+extern unsigned long long audioCycles;
+void readControls();
+int trueTap;
+int subTap;
+char tapFlip;
 
 // Subdivision
 char subdiv;
+void checkTap();
+void checkBypass();
 void checkSubdiv();
-
-// Time knob averaging
-unsigned short avgIndex;
-unsigned int avgBuffer[TIME_KNOB_AVERAGE_LEN];
-unsigned int avg;
-unsigned int total;
 
 // Potentiometer stuff
 void readPots(void);
