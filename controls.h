@@ -15,6 +15,8 @@ extern "C" {
 // Outputs
 #define TAP_LIGHT_TRUE_W LATCbits.LATC15
 #define BYPASS_W LATEbits.LATE5
+#define BYPASS_FLIP LATEINV = BIT_5
+#define RELAY_FLIP LATBINV = BIT_8
 #define SUB_1_W LATBbits.LATB12
 #define SUB_2_W LATBbits.LATB13
 #define SUB_3_W LATBbits.LATB14

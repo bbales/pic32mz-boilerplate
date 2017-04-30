@@ -8,8 +8,13 @@
 #include "dsp.h"
 
 void controlsInit() {
-    // Tap LED
+    // True Tap LED
     TRISCbits.TRISC15 = 0;
+    TAP_LIGHT_TRUE_W = 1;
+
+    // Bypass LED
+    TRISBbits.TRISB8 = 0;
+    ANSELBbits.ANSB5 = 0;
 
     // Tap switch
     TRISEbits.TRISE7 = 1;
@@ -67,45 +72,71 @@ void controlsInit() {
 
 // Tap
 unsigned long long audioCycles = 0;
-int pr2 = 0;
+
 int trueTap = 0;
 int subTap = 0;
 char tapFlip = 0;
-char tapBounce = 1;
+
+// This is the period of timer 2, or the Tap period
+int TAP_PERIOD = 0;
+char TAP_HAS_BOUNCED = 1;
+unsigned int TAP_BOUNCE_COUNT = 0;
+
+char TAP_STATE = 0;
+unsigned long long TAP_SUM = 0;
 
 void checkTap() {
-    // Audio cycles updates 96000 times a second
-    if (TAP_SW_R && tapBounce) {
-        tapBounce = 0;
-        if (audioCycles > 20000) {
-            // Calculate non-subdivided period and clear cycles
-            pr2 = 0.00512 * audioCycles;
+    // Tap switch pressed and this is not a bounce
+    if (TAP_SW_R) {
+        if (!TAP_BOUNCE_COUNT && TAP_HAS_BOUNCED) {
+            // Audio cycles updates 96000 times a second
+
+            // If there was a pause greater than 2 seconds, restart
+            if (audioCycles > 96000 * 2) {
+                TAP_SUM = 0;
+                TAP_STATE = 0;
+            }
+
+            // For last 3 taps, add to sum
+            if (TAP_STATE > 0) { TAP_SUM += audioCycles; }
+
+            // Reset count
             audioCycles = 0;
 
-            //
-            // Formula is ((PBCLK/CLKDIV)/ (tdlen * fcodec)) * lastTap
-            // PBCLK = 945000000
-            // CLKDIV = 1 -> 256
-            // fcodec = 96000
-            // tdlen = 48000
-            // At clkdiv = 1 => 0.0205 * lastTap
-            //
+            if (TAP_STATE == 3) {
+                // Calculate non-subdivided period and clear cycles
+                TAP_PERIOD = (0.00512 * TAP_SUM) / 3.0;
 
-            // Set timer 2 period to reflect tap
-            PR2 = pr2 / subdiv;
+                // Reset the sum and state
+                TAP_SUM = 0;
+                TAP_STATE = 0;
 
-            // Turn both tap LEDs
-            TAP_LIGHT_TRUE_W = 1;
-            SUB_1_W = 1;
-            SUB_2_W = 1;
-            SUB_3_W = 1;
-            SUB_4_W = 1;
+                //
+                // Formula is ((PBCLK/CLKDIV)/ (tdlen * fcodec)) * lastTap
+                // PBCLK = 945000000
+                // CLKDIV = 1 -> 256
+                // fcodec = 96000
+                // tdlen = 48000
+                // At clkdiv = 1 => 0.0205 * lastTap
+                //
 
-            // Clear tapFlip flag
-            tapFlip = 0;
+                // Set timer 2 period to reflect tap
+                PR2 = TAP_PERIOD / subdiv;
+
+                // Clear tapFlip flag
+                tapFlip = 0;
+            } else {
+                // Increment the state
+                TAP_STATE++;
+            }
+
+            // Tap switch has not returned to rest
+            TAP_HAS_BOUNCED = 0;
         }
+        TAP_BOUNCE_COUNT = 50000;
     } else {
-        tapBounce = 1;
+        if (!TAP_HAS_BOUNCED) TAP_BOUNCE_COUNT--;
+        if (!TAP_BOUNCE_COUNT) TAP_HAS_BOUNCED = 1;
     }
 
     // Control Tap LEDs
@@ -116,27 +147,35 @@ void checkTap() {
     SUB_4_W = subdiv == 8 && subTap >= 0;
 }
 
+//
 // Bypass
-unsigned int bypassCount = 0;
-char bypassBounce = 1;
+//
+
+char BYPASS_HAS_BOUNCED = 1;
+unsigned int BYPASS_BOUNCE_COUNT = 0;
 
 void checkBypass() {
     // Bypass Routine
     if (BYPASS_SW_R) {
-        if (!bypassCount && bypassBounce) {
-            LATEINV = BIT_5;
-            bypassBounce = 0;
+        if (!BYPASS_BOUNCE_COUNT && BYPASS_HAS_BOUNCED) {
+            // Acutal button logic here
+            RELAY_FLIP;
+            BYPASS_FLIP;
+            BYPASS_HAS_BOUNCED = 0;
         }
-        bypassCount = 50000;
+        BYPASS_BOUNCE_COUNT = 50000;
     } else {
-        if (!bypassBounce) bypassCount--;
-        if (!bypassCount) bypassBounce = 1;
+        if (!BYPASS_HAS_BOUNCED) BYPASS_BOUNCE_COUNT--;
+        if (!BYPASS_BOUNCE_COUNT) BYPASS_HAS_BOUNCED = 1;
     }
 }
 
+//
 // Subdivision
-char subdivBounce = 1;
-unsigned int subdivCount = 0;
+//
+
+char SUBDIV_HAS_BOUNCED = 1;
+unsigned int SUBDIV_BOUNCE_COUNT = 0;
 char subdiv = 1;
 
 short timeState = 0;
@@ -146,19 +185,20 @@ void checkSubdiv() {
     if (SUBDIV_SW_R) {
         // Minimum countdown has elapsed
         // + button has returned to rest before being pressed again
-        if (!subdivCount && subdivBounce) {
+        if (!SUBDIV_BOUNCE_COUNT && SUBDIV_HAS_BOUNCED) {
+            // Actual button logic here
             if (subdiv == 8) {
                 subdiv = 1;
             } else {
                 subdiv *= 2;
             }
-            PR2 = pr2 / subdiv;
-            subdivBounce = 0;
+            PR2 = TAP_PERIOD / subdiv;
+            SUBDIV_HAS_BOUNCED = 0;
         }
-        subdivCount = 50000;
+        SUBDIV_BOUNCE_COUNT = 50000;
     } else {
-        if (!subdivBounce) subdivCount--;
-        if (!subdivCount) subdivBounce = 1;
+        if (!SUBDIV_HAS_BOUNCED) SUBDIV_BOUNCE_COUNT--;
+        if (!SUBDIV_BOUNCE_COUNT) SUBDIV_HAS_BOUNCED = 1;
     }
 
     // Time Switch LEDs

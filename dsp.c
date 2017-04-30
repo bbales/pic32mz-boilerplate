@@ -38,18 +38,26 @@ int32 DSPTapeDelayFunc(int32 sample) {
 
 void DSPTapeDelayTimerFunc(void) {
     asm volatile("di");
-    trueTap--;
-    subTap--;
     tapeDelay.line[tapeDelay.step] =
         tapeDelay.sample + tapeDelay.decay * tapeDelay.line[tapeDelay.step];
     tapeDelay.step++;
+
+    // Decrement counters for tap LEDs
+    subTap--;
+    trueTap--;
+
+    // At the end of the tape, go back to the beginning
     if (tapeDelay.step >= tapeDelay.length) {
         tapeDelay.step = 0;
 
-        // Tap LEDs
+        // The LED should be illuminated for 20% of the tape length
         subTap = tapeDelay.length * 0.2;
+
+        // tapFlip is flipped every tape length
         if (tapFlip >= subdiv - 1) {
             tapFlip = 0;
+
+            // truetap gets reset once all subdivisions have occurred
             trueTap = subTap * subdiv;
         } else {
             tapFlip++;

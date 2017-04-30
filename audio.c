@@ -12,24 +12,26 @@
 #include "controls.h"
 
 void codecRW() {
+    int32 clipped = 0;
     asm volatile("di");
     if (codec.channel == CHANNEL_B) {
         // Processing
-        // codec.leftOut = codec.dry * codec.leftIn +
-        //                 codec.wet * leaky.func(tapeDelay.func(mod.func(codec.leftIn)));
         if (SW1 == 0) {
-            codec.leftOut = tapeDelay.func(l2.func(l2, l1.func(l1, codec.leftIn)));
+            codec.leftOut = 2 * codec.dry * codec.leftIn +
+                            codec.wet * l2.func(l2, tapeDelay.func(codec.leftIn));
         } else if (SW1 == 1) {
             codec.leftOut = 2 * tapeDelay.func(l2.func(l2, l1.func(l1, codec.leftIn)));
         } else {
-            codec.leftOut = 4 * tapeDelay.func(l2.func(l2, l1.func(l1, codec.leftIn)));
+            codec.leftOut = 4 * tapeDelay.func(l2.func(l2, codec.leftIn));
         }
 
         // Read SPI4BUF
         codec.leftIn = SPI4BUF;
 
         // Write to SPI4BUF
-        SPI4BUF = codec.leftOut;
+        clipped = codec.leftOut > 8388607 ? 8388607 : codec.leftOut;
+        clipped = codec.leftOut < -8388607 ? -8388607 : codec.leftOut;
+        SPI4BUF = clipped;
 
         // Switch channels
         codec.channel = CHANNEL_A;
@@ -47,6 +49,7 @@ void codecRW() {
         codec.channel = CHANNEL_B;
     }
 
+    // Count upward
     audioCycles++;
 
     // Clear interrupt flag
@@ -99,10 +102,10 @@ void codecInit() {
     SDI4R = 0b0011;
 
     // CODEC SDI (PIC SDO @ RD0) <-- Move to RD0 on next board
-    TRISDbits.TRISD5 = OUTPUT;
-    RPD5R = 0b1000;
-    // TRISDbits.TRISD0 = OUTPUT;
-    // RPD0R = 0b1000;
+    // TRISDbits.TRISD5 = OUTPUT;
+    // RPD5R = 0b1000;
+    TRISDbits.TRISD0 = OUTPUT;
+    RPD0R = 0b1000;
 
     // CODEC WS (PIC SS @ RD9)
     TRISDbits.TRISD9 = OUTPUT;
