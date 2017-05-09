@@ -51,6 +51,7 @@ typedef struct DSPTapeDelay{
     int step;
     int32 sample;
     double decay;
+    double swell;
     int length;
     int32 line[48000];
     int32 temp;

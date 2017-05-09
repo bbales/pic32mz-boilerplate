@@ -13,6 +13,12 @@
 #include "audio.h"
 #include "controls.h"
 
+int32 clip24bit(int32 a) {
+    if (a > 8388606) return 8388606;
+    if (a < -8388606) return -8388606;
+    return a;
+}
+
 //
 // Sync Delay implementation
 //
@@ -38,8 +44,8 @@ int32 DSPTapeDelayFunc(int32 sample) {
 
 void DSPTapeDelayTimerFunc(void) {
     asm volatile("di");
-    tapeDelay.line[tapeDelay.step] =
-        tapeDelay.sample + tapeDelay.decay * tapeDelay.line[tapeDelay.step];
+    tapeDelay.line[tapeDelay.step] = clip24bit(
+        tapeDelay.sample + (tapeDelay.decay + tapeDelay.swell) * tapeDelay.line[tapeDelay.step]);
     tapeDelay.step++;
 
     // Decrement counters for tap LEDs
@@ -123,6 +129,7 @@ void dspInit() {
                                .sample = 0,
                                .decay = 0.6,
                                .temp = 0,
+                               .swell = 0,
                                .line = {0}};
 #endif
 

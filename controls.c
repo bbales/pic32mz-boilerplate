@@ -92,7 +92,17 @@ void debounce(Debouncer *d, char trigger) {
 }
 
 void readControls() {
+    debounce(&bypassDebounce, BYPASS_SW_R);
     debounce(&tapDebounce, TAP_SW_R);
+    debounce(&subdivDebounce, SUBDIV_SW_R);
+
+    if (TAP_SW_R) {
+        tapeDelay.swell += 0.00001;
+    } else {
+        tapeDelay.swell -= 0.01;
+        if (tapeDelay.swell < 0.0) tapeDelay.swell = 0.0;
+    }
+    if (tapeDelay.swell + tapeDelay.decay > 1.2) tapeDelay.swell = 1.2 - tapeDelay.decay;
 
     // Control Tap LEDs
     TAP_LIGHT_TRUE_W = trueTap >= 0;
@@ -100,9 +110,6 @@ void readControls() {
     SUB_2_W = subdiv == 2 && subTap >= 0;
     SUB_3_W = subdiv == 4 && subTap >= 0;
     SUB_4_W = subdiv == 8 && subTap >= 0;
-
-    debounce(&bypassDebounce, BYPASS_SW_R);
-    debounce(&subdivDebounce, SUBDIV_SW_R);
 }
 
 //
@@ -138,14 +145,12 @@ void checkTap() {
         TAP_SUM = 0;
         TAP_STATE = 0;
 
-        //
         // Formula is ((PBCLK/CLKDIV)/ (tdlen * fcodec)) * lastTap
         // PBCLK = 945000000
         // CLKDIV = 1 -> 256
         // fcodec = 96000
         // tdlen = 48000
         // At clkdiv = 1 => 0.0205 * lastTap
-        //
 
         // Set timer 2 period to reflect tap
         PR2 = TAP_PERIOD / subdiv;
