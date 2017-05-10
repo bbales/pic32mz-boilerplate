@@ -39,14 +39,17 @@ Debouncer subdivDebounce;
 void controlsInit();
 
 // Tap
-extern unsigned long long audioCycles;
 void readControls();
-int trueTap;
-int subTap;
-char tapFlip;
+
+typedef struct Tap {
+    unsigned long long audioCycles, sum;
+    int true, sub, period;
+    char flip, subdiv, state;
+} Tap;
+
+Tap tap;
 
 // Subdivision
-char subdiv;
 void checkTap();
 void checkBypass();
 void checkSubdiv();

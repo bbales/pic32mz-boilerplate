@@ -10,6 +10,7 @@
 Debouncer tapDebounce;
 Debouncer bypassDebounce;
 Debouncer subdivDebounce;
+Tap tap;
 
 void controlsInit() {
     // True Tap LED
@@ -76,6 +77,15 @@ void controlsInit() {
     subdivDebounce.func = checkSubdiv;
     subdivDebounce.count = 0;
     subdivDebounce.hasBounced = 1;
+
+    tap.audioCycles = 0;
+    tap.true = 0;
+    tap.sub = 0;
+    tap.flip = 0;
+    tap.period = 0;
+    tap.state = 0;
+    tap.sum = 0;
+    tap.subdiv = 1;
 }
 
 void debounce(Debouncer *d, char trigger) {
@@ -105,45 +115,37 @@ void readControls() {
     if (tapeDelay.swell + tapeDelay.decay > 1.2) tapeDelay.swell = 1.2 - tapeDelay.decay;
 
     // Control Tap LEDs
-    TAP_LIGHT_TRUE_W = trueTap >= 0;
-    SUB_1_W = subdiv == 1 && subTap >= 0;
-    SUB_2_W = subdiv == 2 && subTap >= 0;
-    SUB_3_W = subdiv == 4 && subTap >= 0;
-    SUB_4_W = subdiv == 8 && subTap >= 0;
+    TAP_LIGHT_TRUE_W = tap.true >= 0;
+    SUB_1_W = tap.subdiv == 1 && tap.sub >= 0;
+    SUB_2_W = tap.subdiv == 2 && tap.sub >= 0;
+    SUB_3_W = tap.subdiv == 4 && tap.sub >= 0;
+    SUB_4_W = tap.subdiv == 8 && tap.sub >= 0;
 }
 
 //
 // Tap
 //
 
-unsigned long long audioCycles = 0;
-int trueTap = 0;
-int subTap = 0;
-char tapFlip = 0;
-int TAP_PERIOD = 0;
-char TAP_STATE = 0;
-unsigned long long TAP_SUM = 0;
-
 void checkTap() {
     // If there was a pause greater than 2 seconds, restart
-    if (audioCycles > 96000 * 2) {
-        TAP_SUM = 0;
-        TAP_STATE = 0;
+    if (tap.audioCycles > 96000 * 2) {
+        tap.sum = 0;
+        tap.state = 0;
     }
 
     // For last 3 taps, add to sum
-    if (TAP_STATE > 0) { TAP_SUM += audioCycles; }
+    if (tap.state > 0) { tap.sum += tap.audioCycles; }
 
     // Reset count
-    audioCycles = 0;
+    tap.audioCycles = 0;
 
-    if (TAP_STATE == 3) {
+    if (tap.state == 3) {
         // Calculate non-subdivided period and clear cycles
-        TAP_PERIOD = (0.00512 * TAP_SUM) / 3.0;
+        tap.period = (0.00512 * tap.sum) / 3.0;
 
         // Reset the sum and state
-        TAP_SUM = 0;
-        TAP_STATE = 0;
+        tap.sum = 0;
+        tap.state = 0;
 
         // Formula is ((PBCLK/CLKDIV)/ (tdlen * fcodec)) * lastTap
         // PBCLK = 945000000
@@ -153,13 +155,13 @@ void checkTap() {
         // At clkdiv = 1 => 0.0205 * lastTap
 
         // Set timer 2 period to reflect tap
-        PR2 = TAP_PERIOD / subdiv;
+        PR2 = tap.period / tap.subdiv;
 
-        // Clear tapFlip flag
-        tapFlip = 0;
+        // Clear tap.flip flag
+        tap.flip = 0;
     } else {
         // Increment the state
-        TAP_STATE++;
+        tap.state++;
     }
 }
 
@@ -176,15 +178,13 @@ void checkBypass() {
 // Subdivision
 //
 
-char subdiv = 1;
-
 void checkSubdiv() {
-    if (subdiv == 8) {
-        subdiv = 1;
+    if (tap.subdiv == 8) {
+        tap.subdiv = 1;
     } else {
-        subdiv *= 2;
+        tap.subdiv *= 2;
     }
-    PR2 = TAP_PERIOD / subdiv;
+    PR2 = tap.period / tap.subdiv;
 }
 
 //

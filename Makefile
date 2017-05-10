@@ -109,7 +109,7 @@ help: .help-post
 include nbproject/Makefile-impl.mk
 
 # include project make variables
-include nbproject/Makefile-variables.mk
+# include nbproject/Makefile-variables.mk
 
 # programming
 program:

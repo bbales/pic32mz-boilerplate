@@ -50,7 +50,7 @@ void codecRW() {
     }
 
     // Count upward
-    audioCycles++;
+    tap.audioCycles++;
 
     // Clear interrupt flag
     asm volatile("ei");

@@ -49,24 +49,24 @@ void DSPTapeDelayTimerFunc(void) {
     tapeDelay.step++;
 
     // Decrement counters for tap LEDs
-    subTap--;
-    trueTap--;
+    tap.sub--;
+    tap.true --;
 
     // At the end of the tape, go back to the beginning
     if (tapeDelay.step >= tapeDelay.length) {
         tapeDelay.step = 0;
 
         // The LED should be illuminated for 20% of the tape length
-        subTap = tapeDelay.length * 0.2;
+        tap.sub = tapeDelay.length * 0.2;
 
-        // tapFlip is flipped every tape length
-        if (tapFlip >= subdiv - 1) {
-            tapFlip = 0;
+        // tap.flip is flipped every tape length
+        if (tap.flip >= tap.subdiv - 1) {
+            tap.flip = 0;
 
-            // truetap gets reset once all subdivisions have occurred
-            trueTap = subTap * subdiv;
+            // tap.true gets reset once all subdivisions have occurred
+            tap.true = tap.sub * tap.subdiv;
         } else {
-            tapFlip++;
+            tap.flip++;
         }
     }
 
