@@ -1,3 +1,6 @@
+#ifndef CONTROLS_H
+#define	CONTROLS_H
+
 #ifdef	__cplusplus
 extern "C" {
 #endif
@@ -52,14 +55,12 @@ Debouncer subdivDebounce;
 
 void readControls();
 
-typedef struct Tap {
+struct Tap {
     unsigned long long audioCycles, sum;
     unsigned int true, sub, avg;
     double period;
     char flip, subdiv, state;
 } Tap;
-
-Tap tap;
 
 void checkTap();
 void checkBypass();
@@ -69,11 +70,13 @@ void checkSubdiv();
 // Potentiometers
 //
 
+struct Pots{
+    double pot0,pot1,pot2,pot3;
+    char turn;
+} Pots;
+
 void readPots(void);
 void __ISR_AT_VECTOR(_TIMER_1_VECTOR, IPL6SRS) readPots(void);
-
-#ifndef CONTROLS_H
-#define	CONTROLS_H
 
 #ifdef	__cplusplus
 }

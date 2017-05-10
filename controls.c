@@ -10,7 +10,6 @@
 Debouncer tapDebounce;
 Debouncer bypassDebounce;
 Debouncer subdivDebounce;
-Tap tap;
 
 void controlsInit() {
     // True Tap LED
@@ -79,8 +78,11 @@ void controlsInit() {
     subdivDebounce.max = 50000;
 
     // Configure tap struct
-    tap.subdiv = 1;
-    tap.avg = 48000;
+    Tap = (struct Tap){};
+    Tap.subdiv = 1;
+    Tap.avg = 48000;
+
+    Pots = (struct Pots){.turn = 0};
 }
 
 void debounce(Debouncer *d, char trigger) {
@@ -112,11 +114,11 @@ void readControls() {
     if (tapeDelay.swell + tapeDelay.decay > 1.2) tapeDelay.swell = 1.2 - tapeDelay.decay;
 
     // Control Tap LEDs
-    TAP_LIGHT_TRUE_W = tap.true > 0;
-    SUB_1_W = tap.subdiv == 1 && tap.sub > 0;
-    SUB_2_W = tap.subdiv == 2 && tap.sub > 0;
-    SUB_3_W = tap.subdiv == 4 && tap.sub > 0;
-    SUB_4_W = tap.subdiv == 8 && tap.sub > 0;
+    TAP_LIGHT_TRUE_W = Tap.true > 0;
+    SUB_1_W = Tap.subdiv == 1 && Tap.sub > 0;
+    SUB_2_W = Tap.subdiv == 2 && Tap.sub > 0;
+    SUB_3_W = Tap.subdiv == 4 && Tap.sub > 0;
+    SUB_4_W = Tap.subdiv == 8 && Tap.sub > 0;
 }
 
 //
@@ -125,38 +127,38 @@ void readControls() {
 
 void checkTap() {
     // If there was a pause greater than 2 seconds, restart
-    if (tap.audioCycles > 96000) {
-        tap.sum = 0;
-        tap.state = 0;
+    if (Tap.audioCycles > 96000) {
+        Tap.sum = 0;
+        Tap.state = 0;
     }
 
     // For last 3 taps, add to sum
-    if (tap.state > 0) { tap.sum += tap.audioCycles; }
+    if (Tap.state > 0) { Tap.sum += Tap.audioCycles; }
 
     // Reset count
-    tap.audioCycles = 0;
+    Tap.audioCycles = 0;
 
-    if (tap.state == 3) {
+    if (Tap.state == 3) {
         // The tap sum is the number of cycles between 3 taps
-        tap.avg = tap.sum / 3;
+        Tap.avg = Tap.sum / 3;
 
         // Tap avg must be less than the tapeDelayLine length
-        tap.avg = tap.avg >= tapeDelay.length - 1 ? tapeDelay.length - 1 : tap.avg;
+        Tap.avg = Tap.avg >= tapeDelay.length - 1 ? tapeDelay.length - 1 : Tap.avg;
 
         DSPTapeDelaySetTap();
 
         // Reset the sum and state
-        tap.sum = 0;
-        tap.state = 0;
+        Tap.sum = 0;
+        Tap.state = 0;
 
         // Set timer 2 period to reflect tap
-        // PR2 = tap.period / tap.subdiv;
+        // PR2 = Tap.period / Tap.subdiv;
 
-        // Clear tap.flip flag
-        tap.flip = 0;
+        // Clear Tap.flip flag
+        Tap.flip = 0;
     } else {
         // Increment the state
-        tap.state++;
+        Tap.state++;
     }
 }
 
@@ -174,48 +176,53 @@ void checkBypass() {
 //
 
 void checkSubdiv() {
-    if (tap.subdiv == 8) {
-        tap.subdiv = 1;
+    if (Tap.subdiv == 8) {
+        Tap.subdiv = 1;
     } else {
-        tap.subdiv *= 2;
+        Tap.subdiv *= 2;
     }
-    // PR2 = tap.period / tap.subdiv;
+    // PR2 = Tap.period / Tap.subdiv;
 }
 
 //
 // Potentiometer stuff
 //
 
-char turn = 0;
-
-// Timer1 handler
 void readPots(void) {
-    switch (turn) {
+    switch (Pots.turn) {
     case 0:
-        tapeDelay.decay = readFilteredADC(0) / 4096.0;
-        turn = 1;
+        Pots.pot0 = readFilteredADC(0) / 4096.0;
+        Pots.turn++;
         break;
     case 1:
-
-        // l1.alpha = readFilteredADC(1) / 4096.0;
-        // l1.alphaNot = 1.0 - l1.alpha;
-        // l2.alpha = l1.alpha;
-        // l2.alphaNot = l2.alphaNot;
-        turn = 2;
+        Pots.pot1 = readFilteredADC(1) / 4096.0;
+        Pots.turn++;
         break;
     case 2:
-        codec.dry = readFilteredADC(1) / 4096.0;
-        codec.wet = 1.0 - codec.dry;
-        turn = 3;
+        Pots.pot2 = readFilteredADC(2) / 4096.0;
+        Pots.turn++;
         break;
     case 3:
-        // DSPPZFilterSetLP(readADC(2) / 4096.0, readADC(3) / 4096.0);
-        // pzf.q = readFilteredADC(3) / 4096.0;
-        res.f = readFilteredADC(2) / 4096.0;
-        res.q = readFilteredADC(3) / 4096.0;
-        turn = 0;
+        Pots.pot3 = readFilteredADC(3) / 4096.0;
+        Pots.turn = 0;
         break;
     }
+
+    // l1.alpha = Pots.pot1;
+    // l1.alphaNot = 1.0 - Pots.pot1;
+    // l2.alpha = Pots.pot1;
+    // l2.alphaNot = l2.alphaNot;
+
+    codec.dry = Pots.pot1;
+    codec.wet = 1.0 - Pots.pot1;
+
+    tapeDelay.decay = Pots.pot0;
+
+    // DSPPZFilterSetLP(Pots.pot2, Pots.pot3);
+    // pzf.q = Pots.pot3;
+
+    res.f = 0.05 + 0.5 * Pots.pot2;
+    res.q = 0.5 + 0.5 * Pots.pot3 - 0.05;
 
     // Clear interrupt
     IFS0bits.T1IF = 0;

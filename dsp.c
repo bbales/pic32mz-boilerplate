@@ -57,24 +57,24 @@ void DSPTapeDelayTimerFunc(void) {
     tapeDelay.step++;
 
     // Decrement counters for tap LEDs
-    if (tap.sub) tap.sub--;
-    if (tap.true) tap.true --;
+    if (Tap.sub) Tap.sub--;
+    if (Tap.true) Tap.true --;
 
     // At the end of the tape, go back to the beginning
     if (tapeDelay.step >= tapeDelay.length) {
         tapeDelay.step = 0;
 
         // The LED should be illuminated for 20% of the tape length
-        tap.sub = tapeDelay.length * 0.2;
+        Tap.sub = tapeDelay.length * 0.2;
 
-        // tap.flip is flipped every tape length
-        if (tap.flip >= tap.subdiv - 1) {
-            tap.flip = 0;
+        // Tap.flip is flipped every tape length
+        if (Tap.flip >= Tap.subdiv - 1) {
+            Tap.flip = 0;
 
-            // tap.true gets reset once all subdivisions have occurred
-            tap.true = tap.sub * tap.subdiv;
+            // Tap.true gets reset once all subdivisions have occurred
+            Tap.true = Tap.sub * Tap.subdiv;
         } else {
-            tap.flip++;
+            Tap.flip++;
         }
     }
 
@@ -88,7 +88,7 @@ void DSPTapeDelaySetTap() {
     unsigned int timerClockDiv = 1;
 
     // Calculates loop period in seconds
-    double period = (double) tap.avg / (double) codec.sampleRate;
+    double period = (double) Tap.avg / (double) codec.sampleRate;
 
     // Desired timer frequency 1/(period/length) = length/period
     unsigned int timerFrequency = tapeDelay.length / period;

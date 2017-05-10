@@ -52,7 +52,7 @@ void codecRW() {
         codec.channel = CHANNEL_B;
 
         // Count upward - do this here because there is less processing on this channel
-        tap.audioCycles++;
+        Tap.audioCycles++;
     }
 
     // Clear interrupt flag

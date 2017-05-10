@@ -50,8 +50,8 @@ void t2Init() {
     T2CONbits.TCS = 0;       // Source is internal peripheral clock
     T2CONbits.T32 = 0;       // 32 bit
 
-    PR2 = 1000; // Timer 2 period
-    TMR2 = 0;   // Clear timer 2 counter
+    PR2 = 800; // Timer 2 period
+    TMR2 = 0;  // Clear timer 2 counter
 
     IPC2bits.T2IP = 7; // Interrupt priority
     IPC2bits.T2IS = 1; // Sub-priority 2
