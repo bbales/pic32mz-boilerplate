@@ -117,27 +117,18 @@ void dspInit() {
 
 #if DELAY_ENABLED == 1
     // Delay - Standard fixed rate buffer delay
-    delay = (DSPDelay){
-        .func = DSPDelayFunc, .step = 0, .length = 20000, .decay = 0.6, .temp = 0, .line = {0}};
+    delay = (DSPDelay){.func = DSPDelayFunc, .length = 20000, .decay = 0.6, .line = {0}};
 #endif
 
 #if TAPE_ENABLED == 1
     // Tape Delay - variable rate buffer delay
-    tapeDelay = (DSPTapeDelay){.func = DSPTapeDelayFunc,
-                               .step = 0,
-                               .length = 48000,
-                               .sample = 0,
-                               .decay = 0.6,
-                               .temp = 0,
-                               .swell = 0,
-                               .line = {0}};
+    tapeDelay =
+        (DSPTapeDelay){.func = DSPTapeDelayFunc, .length = 48000, .decay = 0.6, .line = {0}};
 #endif
 
     // Leaky integrator
-    l1 = (DSPLeakyIntegrator){
-        .func = DSPLeakyIntegratorFunc, .alpha = 0.2, .alphaNot = 0.8, .prevOutput = 0};
-    l2 = (DSPLeakyIntegrator){
-        .func = DSPLeakyIntegratorFunc, .alpha = 0.2, .alphaNot = 0.8, .prevOutput = 0};
+    l1 = (DSPLeakyIntegrator){.func = DSPLeakyIntegratorFunc, .alpha = 0.2, .alphaNot = 0.8};
+    l2 = (DSPLeakyIntegrator){.func = DSPLeakyIntegratorFunc, .alpha = 0.2, .alphaNot = 0.8};
 
     // FIR filter
     fir = (DSPFIRFilter){.func = DSPFIRFilterFunc,
@@ -146,12 +137,7 @@ void dspInit() {
                          .coeffs = {-20858415, -45336999, -48513960, 4602059, 134600231, 311017954,
                                     468218759, 530064262, 468218759, 311017954, 134600231, 4602059,
                                     -48513960, -45336999, -20858415},
-                         .line = {0},
-                         .ptr = 0,
-                         .head = 0,
-                         .acc = 0,
-                         .iterator = 0,
-                         .current = 0};
+                         .line = {0}};
 
     // amplitude modulation
     mod = (DSPAmplitudeModulation){

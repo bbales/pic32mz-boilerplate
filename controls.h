@@ -21,6 +21,15 @@ extern "C" {
 #define SUB_2_W LATBbits.LATB13
 #define SUB_3_W LATBbits.LATB14
 #define SUB_4_W LATBbits.LATB15
+//
+// Initialize Controls
+//
+
+void controlsInit();
+
+//
+// Debounce
+//
 
 typedef struct Debouncer{
     void (*func)(void);
@@ -30,15 +39,14 @@ typedef struct Debouncer{
 
 void debounce(Debouncer * d, char trigger);
 
-// Debouncers
 Debouncer tapDebounce;
 Debouncer bypassDebounce;
 Debouncer subdivDebounce;
 
-// Initialize Controls
-void controlsInit();
-
+//
 // Tap
+//
+
 void readControls();
 
 typedef struct Tap {
@@ -49,12 +57,14 @@ typedef struct Tap {
 
 Tap tap;
 
-// Subdivision
 void checkTap();
 void checkBypass();
 void checkSubdiv();
 
-// Potentiometer stuff
+//
+// Potentiometers
+//
+
 void readPots(void);
 void __ISR_AT_VECTOR(_TIMER_1_VECTOR, IPL6SRS) readPots(void);
 

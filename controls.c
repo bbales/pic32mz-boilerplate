@@ -67,24 +67,15 @@ void controlsInit() {
     RPD4R = 0;
 
     tapDebounce.func = checkTap;
-    tapDebounce.count = 0;
     tapDebounce.hasBounced = 1;
 
     bypassDebounce.func = checkBypass;
-    bypassDebounce.count = 0;
     bypassDebounce.hasBounced = 1;
 
     subdivDebounce.func = checkSubdiv;
-    subdivDebounce.count = 0;
     subdivDebounce.hasBounced = 1;
 
-    tap.audioCycles = 0;
-    tap.true = 0;
-    tap.sub = 0;
-    tap.flip = 0;
-    tap.period = 0;
-    tap.state = 0;
-    tap.sum = 0;
+    // Configure tap struct
     tap.subdiv = 1;
 }
 

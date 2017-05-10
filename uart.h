@@ -4,7 +4,6 @@
 #define CR 0x0D
 #define LF 0x0A
 
-// UART macro functions
 #define uartNewline() uartSendChar(CR); uartSendChar(LF);
 #define uartClearScreen() uartSendString("\033[2J");
 

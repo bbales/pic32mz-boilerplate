@@ -8,7 +8,10 @@
 
 #include "timers.h"
 
+//
 // Timer 1 - Sampling
+//
+
 void t1Init() {
     asm volatile("di"); // Disable interrupts
 
@@ -34,7 +37,10 @@ void t1Init() {
     asm volatile("ei"); // Enable interrupts
 }
 
+//
 // Timer 2 - Tape Delay
+//
+
 void t2Init() {
     asm volatile("DI"); // Disable interrupts
 
@@ -57,7 +63,10 @@ void t2Init() {
     asm volatile("EI"); // Enable interrupts
 }
 
+//
 // Timer 3 - Tap Light
+//
+
 void t3Init() {
     asm volatile("DI"); // Disable interrupts
 
