@@ -44,14 +44,14 @@ void t1Init() {
 void t2Init() {
     asm volatile("DI"); // Disable interrupts
 
-    T2CON = 0;           // Clear Timer 2 config
-    T2CONbits.ON = 0;    // Disable timer 2
-    T2CONbits.TCKPS = 2; // Input clock prescale select (1:256 (T2CLKIN = 31250 Hz))
-    T2CONbits.TCS = 0;   // Source is internal peripheral clock
-    T2CONbits.T32 = 0;   // 32 bit
+    T2CON = 0;               // Clear Timer 2 config
+    T2CONbits.ON = 0;        // Disable timer 2
+    T2CONbits.TCKPS = 0b000; // Input clock prescale select (1:256 (T2CLKIN = 31250 Hz))
+    T2CONbits.TCS = 0;       // Source is internal peripheral clock
+    T2CONbits.T32 = 0;       // 32 bit
 
-    PR2 = 500; // Timer 2 period
-    TMR2 = 0;  // Clear timer 2 counter
+    PR2 = 1000; // Timer 2 period
+    TMR2 = 0;   // Clear timer 2 counter
 
     IPC2bits.T2IP = 7; // Interrupt priority
     IPC2bits.T2IS = 1; // Sub-priority 2

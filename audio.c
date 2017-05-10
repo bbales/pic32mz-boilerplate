@@ -11,19 +11,22 @@
 #include "dsp.h"
 #include "controls.h"
 
+int32 clipped = 0;
+
 void codecRW() {
-    int32 clipped = 0;
     asm volatile("di");
     if (codec.channel == CHANNEL_B) {
         // Processing
         if (SW1 == 0) {
-            codec.leftOut = 2 * codec.dry * codec.leftIn +
-                            codec.wet * l2.func(l2, tapeDelay.func(codec.leftIn));
+            codec.leftOut =
+                res.func(codec.dry * codec.leftIn + codec.wet * tapeDelay.func(codec.leftIn));
         } else if (SW1 == 1) {
-            codec.leftOut = 2 * tapeDelay.func(l2.func(l2, l1.func(l1, codec.leftIn)));
+            codec.leftOut = tapeDelay.func(l2.func(l2, l1.func(l1, codec.leftIn)));
         } else {
-            codec.leftOut = 4 * tapeDelay.func(l2.func(l2, codec.leftIn));
+            codec.leftOut = tapeDelay.func(l2.func(l2, codec.leftIn));
         }
+        // codec.leftOut = res.func(codec.leftIn);
+        // codec.leftOut = pzf.func(codec.leftIn);
 
         // Read SPI4BUF
         codec.leftIn = SPI4BUF;
@@ -47,10 +50,10 @@ void codecRW() {
 
         // Switch channels
         codec.channel = CHANNEL_B;
-    }
 
-    // Count upward
-    tap.audioCycles++;
+        // Count upward - do this here because there is less processing on this channel
+        tap.audioCycles++;
+    }
 
     // Clear interrupt flag
     asm volatile("ei");
@@ -70,6 +73,7 @@ void codecInit() {
                      .leftOut = 0,
                      .rightIn = 0,
                      .rightOut = 0,
+                     .sampleRate = 48000,
                      .wet = 0.0,
                      .dry = 0.0,
                      .channel = 0,

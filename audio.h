@@ -16,12 +16,10 @@
 
 // CS4272 Codec struct
 typedef struct CS4272{
-    int32 leftIn;
-    int32 rightIn;
-    int32 leftOut;
-    int32 rightOut;
-    double wet;
-    double dry;
+    int32 leftIn, rightIn;
+    int32 leftOut, rightOut;
+    unsigned int sampleRate;
+    double wet,dry;
     char channel;
     void (*enable)(char);
     void (*rw)();

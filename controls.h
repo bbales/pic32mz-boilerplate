@@ -4,6 +4,8 @@ extern "C" {
 
 #include <sys/attribs.h>
 
+#define PCLK_FREQ 94500000
+
 // Inputs
 /* These are configured as pull-down, hence the (!) */
 #define TAP_SW_R !PORTEbits.RE7
@@ -35,6 +37,7 @@ typedef struct Debouncer{
     void (*func)(void);
     char hasBounced;
     unsigned int count;
+    unsigned int max;
 } Debouncer;
 
 void debounce(Debouncer * d, char trigger);
@@ -51,7 +54,8 @@ void readControls();
 
 typedef struct Tap {
     unsigned long long audioCycles, sum;
-    int true, sub, period;
+    unsigned int true, sub, avg;
+    double period;
     char flip, subdiv, state;
 } Tap;
 

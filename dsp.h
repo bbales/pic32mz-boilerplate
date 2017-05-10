@@ -19,6 +19,8 @@ extern "C" {
 #define TAPE_ENABLED 1
 #define DELAY_ENABLED 0
 
+#define PCLK_FREQ 94500000
+
 //
 // Routine for initializing all DSP
 //
@@ -48,18 +50,15 @@ DSPDelay delay;
 
 typedef struct DSPTapeDelay{
     int32 (*func)(int32);
-    int step;
-    int32 sample;
-    double decay;
-    double swell;
-    int length;
-    int32 line[48000];
-    int32 temp;
+    int32 sample, temp;
+    int32 line[96000];
+    double decay, swell;
+    unsigned int length, step, stepSize;
 } DSPTapeDelay;
 
 #if TAPE_ENABLED==1
-
 DSPTapeDelay tapeDelay;
+void DSPTapeDelaySetTap();
 void DSPTapeDelayTimerFunc(void);
 void __ISR_AT_VECTOR(_TIMER_2_VECTOR, IPL7SRS) DSPTapeDelayTimerFunc(void);
 #endif
@@ -109,6 +108,35 @@ typedef struct DSPAmplitudeModulation{
 } DSPAmplitudeModulation;
 
 DSPAmplitudeModulation mod;
+
+//
+// Resonant Filter
+//
+
+typedef struct DSPResonantFilter{
+    int32 buf0,buf1;
+    int32 (*func)(int32);
+    double fb,f,q;
+} DSPResonantFilter;
+
+DSPResonantFilter res;
+
+int32 DSPResonantFilterFunc(int32 sample);
+
+//
+// Pole Zero Filter LP + HP
+//
+
+typedef struct DSPPZFilter{
+    int32 (*func)(int32);
+    double a0,a1,b1;
+    int32 in0,in1,out0,out1;
+} DSPPZFilter;
+
+void DSPPZFilterSetHP(double fCut, double fSampling);
+void DSPPZFilterSetLP(double fCut, double fSampling);
+
+DSPPZFilter pzf;
 
 
 #ifdef	__cplusplus
