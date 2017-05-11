@@ -32,9 +32,7 @@ int32 DSPDelayFunc(int32 sample) {
     return delay.temp;
 }
 
-void DSPDelayInit() {
-    delay = (DSPDelay){.func = DSPDelayFunc, .length = 20000, .decay = 0.6, .line = {0}};
-}
+void DSPDelayInit() { delay = (DSPDelay){.func = DSPDelayFunc, .length = 20000, .decay = 0.6, .line = {0}}; }
 
 #endif
 
@@ -50,9 +48,30 @@ int32 DSPTapeDelayFunc(int32 sample) {
 
 void DSPTapeDelayTimerFunc(void) {
     asm volatile("di");
+    int tStep = tapeDelay.step;
 
-    tapeDelay.line[tapeDelay.step] = clip24bit(
-        tapeDelay.sample + (tapeDelay.decay + tapeDelay.swell) * tapeDelay.line[tapeDelay.step]);
+    switch (0) {
+    // Regular
+    case 0:
+        tapeDelay.line[tapeDelay.step] =
+            clip24bit(tapeDelay.sample + (tapeDelay.decay + tapeDelay.swell) * tapeDelay.line[tapeDelay.step]);
+        break;
+    // Octave doubler
+    case 1:
+        tStep /= 2;
+        tapeDelay.line[tStep] =
+            clip24bit(tapeDelay.sample + (tapeDelay.decay + tapeDelay.swell) * tapeDelay.line[tStep]);
+        tapeDelay.line[tapeDelay.length / 2 + tStep - 1] = clip24bit(
+            tapeDelay.sample + (tapeDelay.decay + tapeDelay.swell) * tapeDelay.line[tapeDelay.length / 2 + tStep - 1]);
+        break;
+    // Octave down
+    case 2:
+        tStep *= 2;
+        tStep = tStep >= tapeDelay.length - 1 ? tStep - tapeDelay.length : tStep;
+        tapeDelay.line[tStep] =
+            clip24bit(tapeDelay.sample + (tapeDelay.decay + tapeDelay.swell) * tapeDelay.line[tStep]);
+        break;
+    }
 
     tapeDelay.step++;
 
@@ -141,13 +160,13 @@ int32 DSPFIRFilterFunc(int32 sample) {
 }
 
 void DSPFIRFilterInit() {
-    fir = (DSPFIRFilter){.func = DSPFIRFilterFunc,
-                         .order = 12,
-                         .numCoeffs = 11,
-                         .coeffs = {-20858415, -45336999, -48513960, 4602059, 134600231, 311017954,
-                                    468218759, 530064262, 468218759, 311017954, 134600231, 4602059,
-                                    -48513960, -45336999, -20858415},
-                         .line = {0}};
+    fir =
+        (DSPFIRFilter){.func = DSPFIRFilterFunc,
+                       .order = 12,
+                       .numCoeffs = 11,
+                       .coeffs = {-20858415, -45336999, -48513960, 4602059, 134600231, 311017954, 468218759, 530064262,
+                                  468218759, 311017954, 134600231, 4602059, -48513960, -45336999, -20858415},
+                       .line = {0}};
 }
 
 //
@@ -161,8 +180,7 @@ int32 DSPAmplitudeModulationFunc(int32 sample) {
 }
 
 void DSPAmplitudeModulationInit() {
-    mod = (DSPAmplitudeModulation){
-        .step = 0.0, .wave = sinew, .depth = 0.4, .func = DSPAmplitudeModulationFunc};
+    mod = (DSPAmplitudeModulation){.step = 0.0, .wave = sinew, .depth = 0.4, .func = DSPAmplitudeModulationFunc};
 }
 
 //

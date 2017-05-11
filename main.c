@@ -23,6 +23,7 @@ int main(void) {
     t2Init();
     controlsInit();
 
+    // Main loop
     while (1) readControls();
 
     // Impossible!
