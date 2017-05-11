@@ -9,7 +9,9 @@
 
 Debouncer tapDebounce;
 Debouncer bypassDebounce;
-Debouncer subdivDebounce;
+Debouncer tactDebounce;
+
+int tactState = 0;
 
 void controlsInit() {
     // True Tap LED
@@ -65,24 +67,30 @@ void controlsInit() {
     CM1CONbits.ON = 0;
     RPD4R = 0;
 
+    // Tap switch
     tapDebounce.func = checkTap;
     tapDebounce.hasBounced = 1;
     tapDebounce.max = 1000;
 
+    // Bypass switch
     bypassDebounce.func = checkBypass;
     bypassDebounce.hasBounced = 1;
     bypassDebounce.max = 50000;
 
-    subdivDebounce.func = checkSubdiv;
-    subdivDebounce.hasBounced = 1;
-    subdivDebounce.max = 50000;
+    // Tact switch
+    tactDebounce.func = checkTact;
+    tactDebounce.hasBounced = 1;
+    tactDebounce.max = 15000;
 
-    // Configure tap struct
+    // Configure tap
     Tap = (struct Tap){};
     Tap.subdiv = 1;
     Tap.avg = 48000;
 
+    // Potentiometer readings struct
     Pots = (struct Pots){.turn = 0};
+
+    PWMInit();
 }
 
 void debounce(Debouncer *d, char trigger) {
@@ -98,12 +106,24 @@ void debounce(Debouncer *d, char trigger) {
     }
 }
 
-unsigned int oldStepSize = 0;
-unsigned int oldAvg = 0;
+int SW1Prev;
+int SW2Prev;
+
+int *SUB_1_PTR, *SUB_2_PTR, *SUB_3_PTR, *SUB_4_PTR;
+int regVal = 1;
+
 void readControls() {
     debounce(&bypassDebounce, BYPASS_SW_R);
     debounce(&tapDebounce, TAP_SW_R);
-    debounce(&subdivDebounce, SUBDIV_SW_R);
+    debounce(&tactDebounce, TACT_SW_R);
+
+    if (SW1Prev != SW1 || SW2Prev != SW2) {
+        tactState = 0;
+        SUB_1_PTR = &PWM.p1.on;
+        SUB_2_PTR = &PWM.p2.on;
+        SUB_3_PTR = &PWM.p3.on;
+        SUB_4_PTR = &PWM.p4.on;
+    }
 
     if (TAP_SW_R) {
         tapeDelay.swell += 0.00001;
@@ -115,10 +135,18 @@ void readControls() {
 
     // Control Tap LEDs
     TAP_LIGHT_TRUE_W = Tap.true > 0;
-    SUB_1_W = Tap.subdiv == 1 && Tap.sub > 0;
-    SUB_2_W = Tap.subdiv == 2 && Tap.sub > 0;
-    SUB_3_W = Tap.subdiv == 4 && Tap.sub > 0;
-    SUB_4_W = Tap.subdiv == 8 && Tap.sub > 0;
+
+    // SUB_1_W = Tap.subdiv == 1 && Tap.sub > 0;
+    // SUB_2_W = Tap.subdiv == 2 && Tap.sub > 0;
+    // SUB_3_W = Tap.subdiv == 4 && Tap.sub > 0;
+    // SUB_4_W = Tap.subdiv == 8 && Tap.sub > 0;
+    SUB_1_W = tactState == 0 && *SUB_1_PTR;
+    SUB_2_W = tactState == 1 && *SUB_2_PTR;
+    SUB_3_W = tactState == 2 && *SUB_3_PTR;
+    SUB_4_W = tactState == 3 && *SUB_4_PTR;
+
+    SW1Prev = SW1;
+    SW2Prev = SW2;
 }
 
 //
@@ -175,12 +203,14 @@ void checkBypass() {
 // Subdivision
 //
 
-void checkSubdiv() {
-    if (Tap.subdiv == 8) {
-        Tap.subdiv = 1;
-    } else {
-        Tap.subdiv *= 2;
-    }
+void checkTact() {
+    tactState++;
+    if (tactState > 3) tactState = 0;
+    // if (Tap.subdiv == 8) {
+    //     Tap.subdiv = 1;
+    // } else {
+    //     Tap.subdiv *= 2;
+    // }
     // PR2 = Tap.period / Tap.subdiv;
 }
 
@@ -208,22 +238,27 @@ void readPots(void) {
         break;
     }
 
-    // l1.alpha = Pots.pot1;
-    // l1.alphaNot = 1.0 - Pots.pot1;
-    // l2.alpha = Pots.pot1;
-    // l2.alphaNot = l2.alphaNot;
-
-    codec.dry = Pots.pot1;
-    codec.wet = 1.0 - Pots.pot1;
+    Codec.dry = Pots.pot1;
+    Codec.wet = 1.0 - Pots.pot1;
 
     tapeDelay.decay = Pots.pot0;
 
     // DSPPZFilterSetLP(Pots.pot2, Pots.pot3);
-    // pzf.q = Pots.pot3;
 
     res.f = 0.05 + 0.5 * Pots.pot2;
     res.q = 0.5 + 0.5 * Pots.pot3 - 0.05;
 
     // Clear interrupt
     IFS0bits.T1IF = 0;
+}
+
+//
+// SW PWM
+//
+
+void PWMInit() {
+    PWM.p1 = (struct PWMModule){.duty = 2, .multiplier = 5, .current = 0, .on = 0};
+    PWM.p2 = (struct PWMModule){.duty = 5, .multiplier = 5, .current = 0, .on = 0};
+    PWM.p3 = (struct PWMModule){.duty = 8, .multiplier = 5, .current = 0, .on = 0};
+    PWM.p4 = (struct PWMModule){.duty = 10, .multiplier = 5, .current = 0, .on = 0};
 }

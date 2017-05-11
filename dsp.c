@@ -88,7 +88,7 @@ void DSPTapeDelaySetTap() {
     unsigned int timerClockDiv = 1;
 
     // Calculates loop period in seconds
-    double period = (double) Tap.avg / (double) codec.sampleRate;
+    double period = (double) Tap.avg / (double) Codec.sampleRate;
 
     // Desired timer frequency 1/(period/length) = length/period
     unsigned int timerFrequency = tapeDelay.length / period;

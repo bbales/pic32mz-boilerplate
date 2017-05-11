@@ -11,48 +11,73 @@
 #include "dsp.h"
 #include "controls.h"
 
+#define RES_NORM Codec.leftOut = res.func(Codec.dry * Codec.leftIn + Codec.wet * tapeDelay.func(Codec.leftIn))
+#define RES_MOD Codec.leftOut = Codec.dry * Codec.leftIn + Codec.wet * tapeDelay.func(res.func(Codec.leftIn))
+
 int32 clipped = 0;
+
+int pwm1 = 0;
+int pwm1Duty = 2;
+int pwm1Current = 0;
 
 void codecRW() {
     asm volatile("di");
-    if (codec.channel == CHANNEL_B) {
-        // Processing
-        if (SW1 == 0) {
-            codec.leftOut =
-                res.func(codec.dry * codec.leftIn + codec.wet * tapeDelay.func(codec.leftIn));
-        } else if (SW1 == 1) {
-            codec.leftOut = tapeDelay.func(l2.func(l2, l1.func(l1, codec.leftIn)));
-        } else {
-            codec.leftOut = tapeDelay.func(l2.func(l2, codec.leftIn));
+    if (Codec.channel == CHANNEL_B) {
+        switch (SW2) {
+        case SW_MID:
+            // Resonant Filter Mode
+            switch (SW1) {
+            case SW_UP:
+                RES_NORM;
+                break;
+            case SW_DOWN:
+                RES_MOD;
+                break;
+            case SW_MID:
+                break;
+            }
+            break;
         }
-        // codec.leftOut = res.func(codec.leftIn);
-        // codec.leftOut = pzf.func(codec.leftIn);
-
+        // switch (SW2) {
+        // case SW_MID:
+        //     Codec.leftOut =
+        //         Codec.dry * Codec.leftIn + Codec.wet * tapeDelay.func(res.func(Codec.leftIn));
+        //     break;
+        // }
         // Read SPI4BUF
-        codec.leftIn = SPI4BUF;
+        Codec.leftIn = SPI4BUF;
 
         // Write to SPI4BUF
-        clipped = codec.leftOut > 8388607 ? 8388607 : codec.leftOut;
-        clipped = codec.leftOut < -8388607 ? -8388607 : codec.leftOut;
+        clipped = Codec.leftOut > 8388607 ? 8388607 : Codec.leftOut;
+        clipped = Codec.leftOut < -8388607 ? -8388607 : Codec.leftOut;
         SPI4BUF = clipped;
 
         // Switch channels
-        codec.channel = CHANNEL_A;
+        Codec.channel = CHANNEL_A;
     } else {
         // Processing
-        codec.rightOut = 0;
+        Codec.rightOut = 0;
 
         // Read SPI4BUF
-        codec.rightIn = SPI4BUF;
+        Codec.rightIn = SPI4BUF;
 
         // Write to SPI4BUF
-        SPI4BUF = codec.rightOut;
+        SPI4BUF = Codec.rightOut;
 
         // Switch channels
-        codec.channel = CHANNEL_B;
+        Codec.channel = CHANNEL_B;
 
         // Count upward - do this here because there is less processing on this channel
         Tap.audioCycles++;
+
+        PWM.p1.on = PWM.p1.current++ < PWM.p1.duty * PWM.p1.multiplier;
+        if (PWM.p1.current > 100 * PWM.p1.multiplier) PWM.p1.current = 0;
+        PWM.p2.on = PWM.p2.current++ < PWM.p2.duty * PWM.p2.multiplier;
+        if (PWM.p2.current > 100 * PWM.p2.multiplier) PWM.p2.current = 0;
+        PWM.p3.on = PWM.p3.current++ < PWM.p3.duty * PWM.p3.multiplier;
+        if (PWM.p3.current > 100 * PWM.p3.multiplier) PWM.p3.current = 0;
+        PWM.p4.on = PWM.p4.current++ < PWM.p4.duty * PWM.p4.multiplier;
+        if (PWM.p4.current > 100 * PWM.p4.multiplier) PWM.p4.current = 0;
     }
 
     // Clear interrupt flag
@@ -69,25 +94,17 @@ void codecEnable(char enable) {
 
 void codecInit() {
     // Initialize struct
-    codec = (CS4272){.leftIn = 0,
-                     .leftOut = 0,
-                     .rightIn = 0,
-                     .rightOut = 0,
-                     .sampleRate = 48000,
-                     .wet = 0.0,
-                     .dry = 0.0,
-                     .channel = 0,
-                     .enable = codecEnable,
-                     .rw = codecRW};
+    Codec = (struct CS4272){
+        .sampleRate = 48000, .wet = 0.0, .dry = 0.0, .channel = 0, .enable = codecEnable, .rw = codecRW};
 
     // Disable codec
-    codec.enable(0);
+    Codec.enable(0);
 
     // Setup reference clocks for MCLK
     codecInitMCLK();
 
     // Initialize channel samples
-    codec.leftIn = codec.rightIn = codec.leftOut = codec.rightOut = 0;
+    Codec.leftIn = Codec.rightIn = Codec.leftOut = Codec.rightOut = 0;
 
     // Overlapping modules
     PMCONbits.ON = 0;   // Disable PMCS2
@@ -135,17 +152,17 @@ void codecInit() {
     SPI4CON2bits.AUDMOD = 0b00; // Audio Protocol Mode (I2S)
 
     // Important config
-    SPI4CONbits.FRMEN = 0;   // Framed mode disabled
-    SPI4CONbits.MSSEN = 0;   // Master mode SS enable
-    SPI4CONbits.ENHBUF = 0;  // Enhanced buffer mode 0*
-    SPI4CONbits.MCLKSEL = 1; // Master Clk Select, 1 = REFCLKO1, 0 = PBCLK2
-    SPI4CONbits.DISSDO = 0;  // Disable SDO, 1 = SDO not used, 0 = SDO is used
-    SPI4CONbits.DISSDI = 0;  // Disable SDI, 1 = SDI not used, 0 = SDI is used
-    SPI4CONbits.SMP = 0;     // Input sample phase, 1* = end, 0 = middle
-    SPI4CONbits.CKE = 1;     // Clock edge select
-                             // 1 = data changes on active->idle, 0 = data changes on idle->active
-    SPI4CONbits.CKP = 1;     // Clock polarity select, 1 = active is low, 0 = active is high
-    SPI4CONbits.MSTEN = 1;   // Master Mode Enable, 1 = master, 0 = slave
+    SPI4CONbits.FRMEN = 0;      // Framed mode disabled
+    SPI4CONbits.MSSEN = 0;      // Master mode SS enable
+    SPI4CONbits.ENHBUF = 0;     // Enhanced buffer mode 0*
+    SPI4CONbits.MCLKSEL = 1;    // Master Clk Select, 1 = REFCLKO1, 0 = PBCLK2
+    SPI4CONbits.DISSDO = 0;     // Disable SDO, 1 = SDO not used, 0 = SDO is used
+    SPI4CONbits.DISSDI = 0;     // Disable SDI, 1 = SDI not used, 0 = SDI is used
+    SPI4CONbits.SMP = 0;        // Input sample phase, 1* = end, 0 = middle
+    SPI4CONbits.CKE = 1;        // Clock edge select
+                                // 1 = data changes on active->idle, 0 = data changes on idle->active
+    SPI4CONbits.CKP = 1;        // Clock polarity select, 1 = active is low, 0 = active is high
+    SPI4CONbits.MSTEN = 1;      // Master Mode Enable, 1 = master, 0 = slave
     SPI4CONbits.SRXISEL = 0b11; // Recieve buffer interrupt is generated when
                                 // buffer is full (pg 310)
 
@@ -195,7 +212,7 @@ void codecInit() {
     asm volatile("ei");
 
     // Enable codec
-    codec.enable(1);
+    Codec.enable(1);
 }
 
 void codecInitMCLK() {

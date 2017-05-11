@@ -15,7 +15,7 @@
 #define C32TO24(num) ((0b10000000000000000000000000000000 & num) ? 0b00000000111111111111111111111111 & num : num)
 
 // CS4272 Codec struct
-typedef struct CS4272{
+struct CS4272{
     int32 leftIn, rightIn;
     int32 leftOut, rightOut;
     unsigned int sampleRate;
@@ -23,8 +23,9 @@ typedef struct CS4272{
     char channel;
     void (*enable)(char);
     void (*rw)();
-} CS4272;
-CS4272 codec;
+} Codec;
+
+int pwm1;
 
 // CODEC protos
 void codecRW();

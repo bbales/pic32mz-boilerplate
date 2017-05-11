@@ -13,19 +13,25 @@ extern "C" {
 /* These are configured as pull-down, hence the (!) */
 #define TAP_SW_R !PORTEbits.RE7
 #define BYPASS_SW_R !PORTEbits.RE6
-#define SUBDIV_SW_R !PORTCbits.RC12
+#define TACT_SW_R !PORTCbits.RC12
 #define SW1 !PORTEbits.RE1 + 2*!PORTEbits.RE2
 #define SW2 !PORTEbits.RE3 + 2*!PORTEbits.RE4
+
+#define SW_MID 0
+#define SW_DOWN 1
+#define SW_UP 2
 
 // Outputs
 #define TAP_LIGHT_TRUE_W LATCbits.LATC15
 #define BYPASS_W LATEbits.LATE5
 #define BYPASS_FLIP LATEINV = BIT_5
 #define RELAY_FLIP LATBINV = BIT_8
-#define SUB_1_W LATBbits.LATB12
-#define SUB_2_W LATBbits.LATB13
-#define SUB_3_W LATBbits.LATB14
-#define SUB_4_W LATBbits.LATB15
+
+#define SUB_1_W LATBbits.LATB14
+#define SUB_2_W LATBbits.LATB15
+#define SUB_3_W LATBbits.LATB13
+#define SUB_4_W LATBbits.LATB12
+
 //
 // Initialize Controls
 //
@@ -47,7 +53,7 @@ void debounce(Debouncer * d, char trigger);
 
 Debouncer tapDebounce;
 Debouncer bypassDebounce;
-Debouncer subdivDebounce;
+Debouncer tactDebounce;
 
 //
 // Tap
@@ -64,7 +70,7 @@ struct Tap {
 
 void checkTap();
 void checkBypass();
-void checkSubdiv();
+void checkTact();
 
 //
 // Potentiometers
@@ -77,6 +83,21 @@ struct Pots{
 
 void readPots(void);
 void __ISR_AT_VECTOR(_TIMER_1_VECTOR, IPL6SRS) readPots(void);
+
+//
+// Software PWM
+//
+
+struct PWMModule{
+    short duty, max, multiplier, current;
+    int on;
+} PWModule;
+
+struct PWM{
+    struct PWMModule p1,p2,p3,p4;
+} PWM;
+
+void PWMInit();
 
 #ifdef	__cplusplus
 }
